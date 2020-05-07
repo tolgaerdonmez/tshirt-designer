@@ -1,10 +1,12 @@
 import React, { Component, ChangeEvent } from "react";
 import { Col, Row, Button, InputGroup, FormControl } from "react-bootstrap";
 import Canvas, { CanvasController } from "./Canvas";
-import { fabric } from "fabric";
 import FontPicker from "../CustomFontPicker";
+import ImageUploadModal from "../Modals/ImageUploadModal";
+import ExportImageModal from "../Modals/ExportImageModal";
 import "./Editor.css";
 
+import { fabric } from "fabric";
 import { google_access_key } from "../../config.json";
 
 interface Props {}
@@ -76,10 +78,7 @@ class Editor extends Component<Props, State> {
 						{this.state.editorReady ? (
 							<>
 								<Row>
-									<Button onClick={canvasController.addImage}>
-										<i className="fas fa-image mr-1"></i>
-										Add Image
-									</Button>
+									<ImageUploadModal canvas={this.state.canvasController.canvas} />
 								</Row>
 								<Row className="mt-2">
 									<InputGroup className="my-3">
@@ -92,7 +91,6 @@ class Editor extends Component<Props, State> {
 												});
 											}}
 											setActiveFontCallback={() => {
-												// console.log("loaded");
 												this.state.canvasController.canvas.renderAll();
 											}}
 										/>
@@ -115,6 +113,7 @@ class Editor extends Component<Props, State> {
 											</Button>
 										</InputGroup.Prepend>
 									</InputGroup>
+									<ExportImageModal canvas={this.state.canvasController.canvas.getElement()} />
 								</Row>
 							</>
 						) : null}
