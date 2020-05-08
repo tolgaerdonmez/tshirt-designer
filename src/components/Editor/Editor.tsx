@@ -1,9 +1,11 @@
 import React, { Component, ChangeEvent } from "react";
-import { Col, Row, Button, InputGroup, FormControl } from "react-bootstrap";
-import Canvas, { CanvasController } from "./Canvas";
+import { Col, Row, Button, InputGroup, FormControl, ButtonGroup } from "react-bootstrap";
+import Canvas, { CanvasController, CanvasOrderDirection } from "./Canvas";
 import FontPicker from "../CustomFontPicker";
-import ImageUploadModal from "../Modals/ImageUploadModal";
-import ExportImageModal from "../Modals/ExportImageModal";
+import ImageUploadModal from "../Modals/Image/ImageUploadModal";
+import ExportImageModal from "../Modals/Image/ExportImageModal";
+import ImportProjectModal from "../Modals/Project/ImportProjectModal";
+import ExportProjectModal from "../Modals/Project/ExportProjectModal";
 import "./Editor.css";
 
 import { fabric } from "fabric";
@@ -68,10 +70,26 @@ class Editor extends Component<Props, State> {
 								<i className="fas fa-trash mr-1"></i>
 								Delete Selected
 							</Button>
+							<ButtonGroup aria-label="change object order" className="ml-2">
+								{Object.keys(CanvasOrderDirection).map(direction => (
+									<Button
+										key={direction}
+										variant="warning"
+										disabled={this.state.selectedObjects.length === 0}
+										onClick={() =>
+											this.state.canvasController.changeObjectOrder(
+												this.state.selectedObjects,
+												direction
+											)
+										}>
+										{direction}
+									</Button>
+								))}
+							</ButtonGroup>
 						</div>
 					</Col>
-					<Col>
-						<Row>
+					<Col className="d-flex flex-column">
+						<Row className="align-self-start">
 							<h1>Editor</h1>
 						</Row>
 						{/* Editor Panel */}
@@ -113,7 +131,15 @@ class Editor extends Component<Props, State> {
 											</Button>
 										</InputGroup.Prepend>
 									</InputGroup>
-									<ExportImageModal canvas={this.state.canvasController.canvas.getElement()} />
+								</Row>
+								<Row>
+									<ExportImageModal exportFunction={this.state.canvasController.exportToImage} />
+									<ButtonGroup className="ml-2">
+										<ExportProjectModal exportFunction={this.state.canvasController.exportToJSON} />
+										<ImportProjectModal
+											importFunction={this.state.canvasController.importFromJSON}
+										/>
+									</ButtonGroup>
 								</Row>
 							</>
 						) : null}

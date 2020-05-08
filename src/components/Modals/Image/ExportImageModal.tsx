@@ -1,12 +1,11 @@
 import React, { ReactElement, useState, ChangeEvent } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
-import { saveAs } from "file-saver";
 
 interface Props {
-	canvas: HTMLCanvasElement;
+	exportFunction: (format: string, fileName?: string, includeBackground?: boolean) => void;
 }
 
-function ExportImageModal({ canvas }: Props): ReactElement {
+function ExportImageModal({ exportFunction }: Props): ReactElement {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		var isFileSaverSupported = !!new Blob();
@@ -15,6 +14,7 @@ function ExportImageModal({ canvas }: Props): ReactElement {
 	}
 	const [show, setShow] = useState(false);
 	const [selected, setSelected] = useState("jpg");
+	const [includeBackground, setIncludeBackground] = useState(true);
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -24,22 +24,15 @@ function ExportImageModal({ canvas }: Props): ReactElement {
 	};
 
 	const handleDownload = () => {
-		try {
-			canvas.toBlob((data: any) => {
-				saveAs(data, "tshirt." + selected);
-				handleClose();
-			});
-		} catch (e) {
-			console.log(e);
-			window.alert("Try downloading again!");
-		}
+		exportFunction(selected, "tshirt", includeBackground);
+		handleClose();
 	};
 
 	return (
 		<>
 			<Button variant="primary" onClick={handleShow}>
 				<i className="fas fa-image mr-1"></i>
-				Export Image
+				Download Design
 			</Button>
 
 			<Modal show={show} onHide={handleClose}>
@@ -62,6 +55,16 @@ function ExportImageModal({ canvas }: Props): ReactElement {
 								name="png"
 								checked={selected === "png" ? true : false}
 								onChange={handleOnChange}
+							/>
+							<Form.Check
+								inline
+								type="checkbox"
+								label="Include Background"
+								name="includeBackground"
+								checked={includeBackground}
+								onChange={() => {
+									setIncludeBackground(!includeBackground);
+								}}
 							/>
 						</div>
 					</Form>
