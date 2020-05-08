@@ -6,7 +6,8 @@ export interface CanvasController {
 	canvas: fabric.Canvas;
 	setBackground: () => void;
 	addImage: () => void;
-	addText: (text: string, fontFamily: string) => void;
+	addText: (text: string, fontFamily: string, textColor: string) => void;
+	updateText: (textObj: fabric.Textbox, text: string, fontFamily: string, textColor: string) => void;
 	deleteObjects: (objects: fabric.Object[]) => void;
 	changeObjectOrder: (object: fabric.Object[], direction: CanvasOrderDirection | string) => void;
 	exportToImage: (format: string, fileName?: string, includeBackground?: boolean) => void;
@@ -53,21 +54,29 @@ export default class Canvas extends Component<Props, State> {
 
 	addImage = () => {
 		console.log("adding image");
-		fabric.Image.fromURL("images/logo512.png", img => {
+		fabric.Image.fromURL("images/logo512.png", (img: fabric.Image) => {
 			this.canvas.add(img);
 		});
 	};
 
-	addText = (text: string, fontFamily: string) => {
+	addText = (text: string, fontFamily: string, textColor: string) => {
 		const [w, h]: number[] = [this.canvas.getWidth(), this.canvas.getHeight()];
-		let t = new fabric.Text(text, {
+		let t = new fabric.Textbox(text, {
 			left: w / 4,
 			top: h / 4,
 			fontFamily: fontFamily,
 			fontSize: 100,
-			fill: "white",
+			fill: textColor,
+			editable: true,
 		});
 		this.canvas.add(t);
+	};
+
+	updateText = (textObj: fabric.Textbox, text: string, fontFamily: string, textColor: string) => {
+		textObj.set("text", text);
+		textObj.set("fontFamily", fontFamily);
+		textObj.set("fill", textColor);
+		this.canvas.renderAll();
 	};
 
 	deleteObjects = (objects: fabric.Object[]) => {

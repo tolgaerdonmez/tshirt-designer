@@ -1,5 +1,5 @@
 import React, { ReactElement, useState, ChangeEvent } from "react";
-import { Button, Modal, FormFile, FormControl, Tabs, Tab, Form } from "react-bootstrap";
+import { Button, Modal, Form, FormControl, Tabs, Tab } from "react-bootstrap";
 import { fabric } from "fabric";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 function ImageUploadModal({ canvas }: Props): ReactElement {
 	const [show, setShow] = useState(false);
 	const [imageURL, setImageURL] = useState("");
-
+	const [imageName, setImageName] = useState("image");
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 
@@ -17,6 +17,7 @@ function ImageUploadModal({ canvas }: Props): ReactElement {
 		let file: File = e.target.files[0];
 		const imageSrc = URL.createObjectURL(file);
 		setImageURL(imageSrc);
+		setImageName(file.name);
 	};
 
 	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -43,22 +44,24 @@ function ImageUploadModal({ canvas }: Props): ReactElement {
 					<Tabs defaultActiveKey="upload" id="uncontrolled-tab-example">
 						<Tab eventKey="upload" title="Upload">
 							<div className="py-2 px-2">
-								<FormFile>
-									<FormFile.Label>
+								<Form.File>
+									<Form.Label>
 										Upload an image from your computer <br />
 										(png, jpg, jpeg, svg is officially supported)
-									</FormFile.Label>
-									<FormFile.Input
+									</Form.Label>
+									<Form.File
+										custom
+										label={imageName}
 										accept="image/jpg,image/jpeg,image/png, .svg"
 										onChange={handleFileOnChange}
 									/>
-								</FormFile>
+								</Form.File>
 							</div>
 						</Tab>
 						<Tab eventKey="fromUrl" title="From URL">
 							<div className="py-2 px-2">
 								<Form>
-									<Form.Label>Url to image: </Form.Label>
+									<Form.Label>URL to image: </Form.Label>
 									<FormControl
 										type="url"
 										placeholder="image url"
