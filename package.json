@@ -21,13 +21,15 @@
 		"react-bootstrap": "^1.0.1",
 		"react-dom": "^16.13.1",
 		"react-scripts": "3.4.1",
+		"serve": "^14.2.0",
 		"typescript": "~3.7.2"
 	},
 	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test",
-		"eject": "react-scripts eject"
+		"start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+		"build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+		"test": "NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
+		"eject": "NODE_OPTIONS=--openssl-legacy-provider react-scripts eject",
+		"start:prod": "serve -s build -l 3333"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
