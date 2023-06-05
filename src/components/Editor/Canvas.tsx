@@ -42,7 +42,7 @@ export default class Canvas extends Component<Props, State> {
 	}
 
 	setBackground = () => {
-		fabric.Image.fromURL(`images/${this.props.tshirt}.png`, img => {
+		fabric.Image.fromURL(`images/${this.props.tshirt}.svg`, img => {
 			img.center();
 			const h: number = img.getScaledHeight();
 			const w: number = img.getScaledWidth();
