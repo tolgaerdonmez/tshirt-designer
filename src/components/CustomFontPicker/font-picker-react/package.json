@@ -1,0 +1,110 @@
+{
+	"name": "font-picker-react",
+	"version": "3.5.1",
+	"description": "Font selector component for Google Fonts",
+	"author": {
+		"name": "Samuel Meuli",
+		"email": "me@samuelmeuli.com",
+		"url": "https://samuelmeuli.com"
+	},
+	"repository": "github:samuelmeuli/font-picker-react",
+	"homepage": "https://font-picker.samuelmeuli.com",
+	"license": "MIT",
+	"keywords": [
+		"fonts",
+		"google fonts",
+		"selector",
+		"picker",
+		"component",
+		"preview",
+		"download",
+		"react",
+		"react-component"
+	],
+	"main": "./dist/FontPicker.js",
+	"module": "./dist/FontPicker.es.js",
+	"types": "./dist/FontPicker.d.ts",
+	"files": [
+		"./dist/"
+	],
+	"scripts": {
+		"start": "npm-run-all build:clean build:ts --parallel start:*",
+		"start:ts": "rollup --config --sourcemap --watch",
+		"start:storybook": "start-storybook --port 3000",
+		"build": "run-s build:*",
+		"build:clean": "rm -rf ./dist/ && mkdir ./dist/",
+		"build:ts": "rollup --config",
+		"test": "tsc --noEmit",
+		"lint:css": "stylelint --ignore-path ./.gitignore --max-warnings 0 '**/*.{css,sass,scss}'",
+		"lint:css:fix": "yarn lint:css --fix",
+		"lint:ts": "eslint --ext .ts,.tsx --ignore-path ./.gitignore --max-warnings 0 '**/*.{ts,tsx}'",
+		"lint:ts:fix": "yarn lint:ts --fix",
+		"format": "prettier --ignore-path ./.gitignore --list-different '**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}'",
+		"format:fix": "yarn format --write",
+		"version": "yarn build",
+		"release": "np"
+	},
+	"dependencies": {
+		"@samuelmeuli/font-manager": "^1.4.0"
+	},
+	"peerDependencies": {
+		"@types/react": "^16.0.0",
+		"react": "^16.0.0"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.9.0",
+		"@samuelmeuli/eslint-config": "^6.0.0",
+		"@samuelmeuli/prettier-config": "^2.0.1",
+		"@samuelmeuli/stylelint-config": "^3.0.0",
+		"@samuelmeuli/tsconfig": "^1.0.0",
+		"@storybook/react": "^5.3.18",
+		"@types/react": "^16.9.34",
+		"@typescript-eslint/eslint-plugin": "^2.29.0",
+		"@typescript-eslint/parser": "^2.29.0",
+		"babel-loader": "^8.1.0",
+		"eslint": "6.8.0",
+		"eslint-config-airbnb": "18.1.0",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-import": "^2.20.2",
+		"eslint-plugin-jsx-a11y": "^6.2.3",
+		"eslint-plugin-react": "^7.19.0",
+		"eslint-plugin-react-hooks": "^2.5.1",
+		"np": "^6.2.2",
+		"npm-run-all": "^4.1.3",
+		"prettier": "^2.0.5",
+		"react": "^16.13.1",
+		"react-dom": "^16.13.1",
+		"rollup": "^1.32.1",
+		"rollup-plugin-typescript2": "^0.27.0",
+		"stylelint": "^12.0.1",
+		"typescript": "^3.8.3"
+	},
+	"browserslist": [
+		"defaults"
+	],
+	"eslintConfig": {
+		"root": true,
+		"extends": "@samuelmeuli/eslint-config/typescript-react",
+		"env": {
+			"browser": true,
+			"node": true
+		},
+		"rules": {
+			"import/no-extraneous-dependencies": [
+				"error",
+				{
+					"devDependencies": [
+						"./.storybook/**/*.js",
+						"./rollup.config.js",
+						"./stories/**/*.jsx"
+					]
+				}
+			],
+			"react/jsx-sort-default-props": "off"
+		}
+	},
+	"stylelint": {
+		"extends": "@samuelmeuli/stylelint-config"
+	},
+	"prettier": "@samuelmeuli/prettier-config"
+}

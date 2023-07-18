@@ -1,0 +1,20 @@
+/* .dropdown-button {
+	background-color: red !important;
+	box-shadow: none !important;
+}
+
+.dropdown-font-family {
+	box-shadow: none !important;
+}
+
+.dropdown-icon {
+	box-shadow: none !important;
+}
+
+.expanded {
+	box-shadow: none !important;
+} */
+.dropdown-menu {
+	height: 200px;
+	overflow-y: scroll;
+}
