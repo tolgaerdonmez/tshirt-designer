@@ -74,13 +74,13 @@ export default class Canvas extends Component<Props, State> {
       this.canvas.setBackgroundImage(img, () => {});
     });
   };
-
+  /*********************************/
   setTShirt = (tShirtId: string) => {
     let objects = this.canvas.getObjects();
-    this.deleteObjects(objects);
+    //this.deleteObjects(objects);
     this.setBackground(tShirtId);
   };
-
+  /*********************************/
   addImage = () => {
     console.log("adding image");
     fabric.Image.fromURL("images/logo512.png", (img: fabric.Image) => {
