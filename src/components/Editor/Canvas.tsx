@@ -12,7 +12,6 @@ export interface CanvasController {
     textObj: fabric.Textbox,
     text: string,
     fontFamily: string
-    //textColor: string
   ) => void;
   updateTextColor: (
     textObj: fabric.Textbox,
@@ -91,6 +90,7 @@ export default class Canvas extends Component<Props, State> {
   };
 
   addText = (text: string, fontFamily: string, textColor: string) => {
+    console.log ("addText, fontFamily: ", fontFamily);
     const [w, h]: number[] = [this.canvas.getWidth(), this.canvas.getHeight()];
     let t = new fabric.Textbox(text, {
       left: w / 4,
@@ -100,7 +100,9 @@ export default class Canvas extends Component<Props, State> {
       fill: textColor,
       editable: true,
     });
+    //t.set({fontFamily: fontFamily});
     this.canvas.add(t);
+    this.canvas.renderAll();
   };
 
   updateText = (
@@ -108,7 +110,8 @@ export default class Canvas extends Component<Props, State> {
     text: string,
     fontFamily: string
   ) => {
-    textObj.set({ text, fontFamily});
+    console.log("Update Text, fontFamily: ", fontFamily);
+    textObj.set({ text: text, fontFamily: fontFamily});
     this.canvas.renderAll();
   };
 

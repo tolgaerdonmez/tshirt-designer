@@ -122,10 +122,10 @@ class Editor extends Component<Props, State> {
 
   initCanvasController = (controller: CanvasController) => {
     controller.canvas.on("mouse:down", () => {
+      console.log ("controller.canvas.on mouse:down");
       const selected = controller.canvas.getActiveObjects();
       const textbox = selected[0];
-      const canEdit: boolean =
-        selected.length === 1 && textbox.isType("textbox");
+      const canEdit = (selected.length === 1 && textbox.isType("textbox"));
       if (selected.length > 0) {
         this.setState({
           selectedObjects: selected,
@@ -136,9 +136,8 @@ class Editor extends Component<Props, State> {
             ? (textbox as any).fill
             : "rgba(255,255,255,255)",
         }, ()=> { 
-          if (canEdit) { 
+          if (canEdit)
             this.syncText(textbox);  // to ensure canvas text matches html textbox value
-          }
         });      
       } else
         this.setState({
@@ -178,7 +177,7 @@ class Editor extends Component<Props, State> {
                 disabled={this.state.selectedObjects.length === 0}
                 onClick={() => {
                   canvasController.deleteObjects(this.state.selectedObjects);
-                  this.setState({ selectedObjects: [] as fabric.Object[] });
+                  this.setState({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
                 }}
               >
                 <i className="fas fa-trash mr-1"></i>
@@ -290,7 +289,7 @@ class Editor extends Component<Props, State> {
                         apiKey={google_access_key}
                         activeFontFamily={this.state.textFont}
                         onChange={(nextFont) => {
-                          
+                          console.log ("FontPicker, textFont, setState nextFont.family: ", nextFont.family);
                           this.setState({
                             textFont: nextFont.family,
                           }, ()=>{ 
@@ -303,9 +302,10 @@ class Editor extends Component<Props, State> {
                               );
                           });
                         }}
+                        
                         setActiveFontCallback={() => {
                            console.log ("setActiveFontCallback");
-                           //this.state.canvasController.canvas.renderAll();
+                           this.state.canvasController.canvas.renderAll();
                         }}
                       />
                     </InputGroup.Prepend>
