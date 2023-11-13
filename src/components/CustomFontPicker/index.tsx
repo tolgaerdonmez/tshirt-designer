@@ -56,7 +56,8 @@ FontPicker.prototype.render = function () {
 			return font1.family.localeCompare(font2.family);
 		});
 	}
-	// const fontList = this.generateFontList(fonts);
+	const fontList = this.generateFontList(fonts);
+	console.log ("font list", fontList);
 	return (
 		<Dropdown>
 			<Dropdown.Toggle variant="success" id="dropdown-basic">

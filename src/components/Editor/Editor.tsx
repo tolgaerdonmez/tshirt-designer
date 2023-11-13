@@ -7,6 +7,7 @@ import {
   FormControl,
   ButtonGroup,
 } from "react-bootstrap";
+
 import Canvas, { CanvasController, CanvasOrderDirection } from "./Canvas";
 import FontPicker from "../CustomFontPicker";
 import ImageUploadModal from "../Modals/Image/ImageUploadModal";
@@ -17,7 +18,6 @@ import "./Editor.css";
 
 import { fabric } from "fabric";
 import { google_access_key } from "../../config.json";
-//import ColorPicker from "../ColorPicker/ColorPicker";
 import ColorSelector from "../ColorSelector/SketchPicker";
 import Thumbnail from "../Thumbnail/Thumbnail";
 //import { isThisTypeNode } from "typescript";
@@ -45,10 +45,6 @@ const hexToRGBA = (hex: string, alpha: number): string => {
   return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
 
-// const colorObjToString = ({rgb}:any):string => {
-// 	return rgb? `rgba(${rgb.r},${rgb.b},${rgb.g},255)`: "rgba(255,255,255,255)";
-// }
-
 class Editor extends Component<Props, State> {
   state = {
     canvasController: {} as CanvasController,
@@ -61,7 +57,7 @@ class Editor extends Component<Props, State> {
     currentColor: "rgba(255,255,255,255)",
     textureImgPath: "",
     tshirtId: "tshirt_0001",
-    tshirtColor: "#333333",
+    tshirtColor: "#333333"
   };
 
   // SH 6/5/2023
@@ -86,25 +82,24 @@ class Editor extends Component<Props, State> {
         const allNotActive = Array.from(inputElements).every(
           (element) => !element.disabled
         );
-
+        // only tshirt is selected in the canvas
         if (this.state.selectedObjects.length === 0 && allNotActive) {
           this.state.canvasController.updateTShirtColor(
             this.state.foreground,
-            this.state.tshirtId
+            this.state.tshirtId,
           );
-          this.setState({ tshirtColor: this.state.foreground });
-        } else if (this.state.editing) {
-          this.state.canvasController.updateText(
-            this.state.selectedObjects[0] as fabric.Textbox,
-            this.state.textInput,
-            this.state.textFont,
-            this.state.foreground
-          );
+          this.setState({ tshirtColor: this.state.foreground});
+        } else if (this.state.editing) {  // text is selected
+              this.state.canvasController.updateTextColor (
+                this.state.selectedObjects[0] as fabric.Textbox,
+                this.state.foreground
+              );
         }
       }
     );
   };
 
+  // dom textbox onchange event
   handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log("handleOnChange e.target.name: ", e.target.name);
     console.log("handleOnChange e.target.value: ", e.target.value);
@@ -114,26 +109,37 @@ class Editor extends Component<Props, State> {
         this.state.selectedObjects[0] as fabric.Textbox,
         this.state.textInput,
         this.state.textFont,
-        this.state.foreground
       );
     }
   };
 
+  syncText = (textbox:any)=> { 
+    const self = this as Editor;
+    textbox.on ('change', function () {
+      self.setState({textInput: textbox.text})
+    });
+  }
+
   initCanvasController = (controller: CanvasController) => {
     controller.canvas.on("mouse:down", () => {
       const selected = controller.canvas.getActiveObjects();
+      const textbox = selected[0];
+      const canEdit: boolean =
+        selected.length === 1 && textbox.isType("textbox");
       if (selected.length > 0) {
-        const canEdit: boolean =
-          selected.length === 1 && selected[0].isType("textbox");
         this.setState({
           selectedObjects: selected,
           editing: canEdit,
-          textInput: canEdit ? (selected[0] as any).text : "",
-          textFont: canEdit ? (selected[0] as any).fontFamily : "Open Sans",
+          textInput: canEdit ? (textbox as any).text : "",
+          textFont: canEdit ? (textbox as any).fontFamily : "Open Sans",
           currentColor: canEdit
-            ? (selected[0] as any).fill
+            ? (textbox as any).fill
             : "rgba(255,255,255,255)",
-        });
+        }, ()=> { 
+          if (canEdit) { 
+            this.syncText(textbox);  // to ensure canvas text matches html textbox value
+          }
+        });      
       } else
         this.setState({
           selectedObjects: [],
@@ -147,9 +153,10 @@ class Editor extends Component<Props, State> {
       const selected = controller.canvas.getActiveObjects();
       if (selected.length > 0)
         this.setState({
-          selectedObjects: selected,
+          selectedObjects: selected
         });
     });
+
     this.setState({ canvasController: controller, editorReady: true });
   };
 
@@ -283,19 +290,22 @@ class Editor extends Component<Props, State> {
                         apiKey={google_access_key}
                         activeFontFamily={this.state.textFont}
                         onChange={(nextFont) => {
+                          
                           this.setState({
                             textFont: nextFont.family,
+                          }, ()=>{ 
+                            console.log ("FontPicker, font family changed, state: ", this.state);
+                            if (this.state.editing)
+                              canvasController.updateText(
+                                this.state.selectedObjects[0] as fabric.Textbox,
+                                this.state.textInput,
+                                this.state.textFont
+                              );
                           });
-                          if (this.state.editing)
-                            canvasController.updateText(
-                              this.state.selectedObjects[0] as fabric.Textbox,
-                              this.state.textInput,
-                              this.state.textFont,
-                              this.state.foreground
-                            );
                         }}
                         setActiveFontCallback={() => {
-                          this.state.canvasController.canvas.renderAll();
+                           console.log ("setActiveFontCallback");
+                           //this.state.canvasController.canvas.renderAll();
                         }}
                       />
                     </InputGroup.Prepend>
@@ -329,8 +339,8 @@ class Editor extends Component<Props, State> {
                             canvasController.updateText(
                               this.state.selectedObjects[0] as fabric.Textbox,
                               this.state.textInput,
-                              this.state.textFont,
-                              fillColor
+                              this.state.textFont
+                              //fillColor
                             );
                           this.setState({ textInput: "", editing: false });
                         }}
@@ -346,12 +356,6 @@ class Editor extends Component<Props, State> {
                     </InputGroup.Prepend>
                   </InputGroup>
                 </Row>
-                {/* <Row className="d-flex justify-content-center">
-                  <ColorPicker
-                    defaultColor={this.state.currentColor}
-                    getColor={(color) => this.setState({ currentColor: color })}
-                  />
-                </Row> */}
                 <Row className="d-flex justify-content-center">
                   <ColorSelector
                     color={this.state.foreground}

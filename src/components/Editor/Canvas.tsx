@@ -11,7 +11,11 @@ export interface CanvasController {
   updateText: (
     textObj: fabric.Textbox,
     text: string,
-    fontFamily: string,
+    fontFamily: string
+    //textColor: string
+  ) => void;
+  updateTextColor: (
+    textObj: fabric.Textbox,
     textColor: string
   ) => void;
   deleteObjects: (objects: fabric.Object[]) => void;
@@ -74,13 +78,11 @@ export default class Canvas extends Component<Props, State> {
       this.canvas.setBackgroundImage(img, () => {});
     });
   };
-  /*********************************/
+
   setTShirt = (tShirtId: string) => {
-    let objects = this.canvas.getObjects();
-    //this.deleteObjects(objects);
     this.setBackground(tShirtId);
   };
-  /*********************************/
+  
   addImage = () => {
     console.log("adding image");
     fabric.Image.fromURL("images/logo512.png", (img: fabric.Image) => {
@@ -104,14 +106,21 @@ export default class Canvas extends Component<Props, State> {
   updateText = (
     textObj: fabric.Textbox,
     text: string,
-    fontFamily: string,
-    textColor: string
+    fontFamily: string
   ) => {
-    console.log("Update Text, textColor: ", textColor);
-    textObj.set({ text, fontFamily, fill: textColor });
+    textObj.set({ text, fontFamily});
     this.canvas.renderAll();
   };
 
+  updateTextColor = (
+    textObj: fabric.Textbox,
+    textColor: string
+  ) => {
+    console.log("Update Text Color, textColor: ", textColor);
+    textObj.set({ fill: textColor});
+    this.canvas.renderAll();
+  };
+  
   updateTShirtColor = (textColorHex: string, tshirtId: string) => {
     let svgUrl = this.getPathById(tshirtId);
     fabric.loadSVGFromURL(svgUrl, (objects) => {
