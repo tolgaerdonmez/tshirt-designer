@@ -17,7 +17,7 @@
 		"@types/react-dom": "^16.9.0",
 		"fabric": "^3.6.3",
 		"file-saver": "^2.0.2",
-		"font-picker-react": "^3.5.1",
+		"font-picker-react": "^3.5.2",
 		"react": "^16.13.1",
 		"react-bootstrap": "^1.0.1",
 		"react-color": "^2.19.3",
