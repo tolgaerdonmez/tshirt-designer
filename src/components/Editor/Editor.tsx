@@ -20,6 +20,7 @@ import { fabric } from "fabric";
 import { google_access_key } from "../../config.json";
 import ColorSelector from "../ColorSelector/SketchPicker";
 import Thumbnail from "../Thumbnail/Thumbnail";
+import PreviewModal from "../Modals/Image/PreviewModel";
 //import { isThisTypeNode } from "typescript";
 
 interface Props {}
@@ -127,6 +128,12 @@ class Editor extends Component<Props, State> {
       const textbox = selected[0];
       const canEdit = (selected.length === 1 && textbox.isType("textbox"));
       if (selected.length > 0) {
+        selected.forEach((obj)=>{
+          const objBoundingBox = obj.getBoundingRect();
+          console.log ("objBoundingBox: ", objBoundingBox);
+        });
+
+        console.log ('selected.length > 0, selected: ', selected);
         this.setState({
           selectedObjects: selected,
           editing: canEdit,
@@ -139,7 +146,8 @@ class Editor extends Component<Props, State> {
           if (canEdit)
             this.syncText(textbox);  // to ensure canvas text matches html textbox value
         });      
-      } else
+      } else {
+        console.log ('selected.length <= 0, selected: ', selected);
         this.setState({
           selectedObjects: [],
           editing: false,
@@ -147,6 +155,7 @@ class Editor extends Component<Props, State> {
           textFont: "Open Sans",
           currentColor: "rgba(255,255,255,255)",
         });
+      }
     });
     controller.canvas.on("mouse:up", () => {
       const selected = controller.canvas.getActiveObjects();
@@ -171,7 +180,7 @@ class Editor extends Component<Props, State> {
               controller={(controller) => this.initCanvasController(controller)}
             />
             {/* Object options */}
-            <div className="mt-3">
+            <div className="mt-3">           
               <Button
                 variant="danger"
                 disabled={this.state.selectedObjects.length === 0}
@@ -366,6 +375,9 @@ class Editor extends Component<Props, State> {
                 </Row>
                 <Row className="flex-grow-1"></Row>
                 <Row className="align-self-end">
+                  <PreviewModal
+                    exportFunction={this.state.canvasController.exportToImage}
+                  />
                   <ExportImageModal
                     exportFunction={this.state.canvasController.exportToImage}
                   />
@@ -379,6 +391,28 @@ class Editor extends Component<Props, State> {
                       }
                     />
                   </ButtonGroup>
+                <Button
+                  variant="danger"
+                  //disabled={this.state.selectedObjects.length === 0}
+                  onClick={() => {
+                    this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
+                    this.state.canvasController.removeObjectsOutsideBoundary();
+                    console.log ("stop here");
+                  }}
+                >
+                {/* <i className="fas fa-trash mr-1"></i> */}
+                  Mask Objects
+                </Button> 
+                <Button
+                  variant="danger"
+                  //disabled={this.state.selectedObjects.length === 0}
+                  onClick={() => {
+                    this.state.canvasController.removeObjectsOutsideBoundary();
+                  }}
+                >
+                {/* <i className="fas fa-trash mr-1"></i> */}
+                  Remove OFB Objects
+                </Button>   
                 </Row>
               </>
             ) : null}
