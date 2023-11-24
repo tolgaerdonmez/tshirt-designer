@@ -412,6 +412,16 @@ class Editor extends Component<Props, State> {
                 >
                 {/* <i className="fas fa-trash mr-1"></i> */}
                   Remove OFB Objects
+                </Button> 
+                <Button
+                  variant="danger"
+                  //disabled={this.state.selectedObjects.length === 0}
+                  onClick={() => {
+                    this.state.canvasController.unclipAndUngroupObjects();
+                  }}
+                >
+                {/* <i className="fas fa-trash mr-1"></i> */}
+                  Unclip mask
                 </Button>   
                 </Row>
               </>

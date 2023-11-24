@@ -34,6 +34,7 @@ export interface CanvasController {
   importFromJSON: (json: object | fabric.Object) => void;
   maskEditableArea: (tShirtId: string, objects: fabric.Object[]) => void;
   removeObjectsOutsideBoundary: () => void;
+  unclipAndUngroupObjects: ()=> void;
 }
 
 export enum CanvasOrderDirection {
@@ -165,30 +166,57 @@ export default class Canvas extends Component<Props, State> {
   //   this.canvas.renderAll();
   // }
 
-removeObjectsOutsideBoundary = ()=> {
-  const canvasWidth = this.canvas.getWidth();
-  const canvasHeight = this.canvas.getHeight();
+  unclipAndUngroupObjects = ()=>{
 
-  // Get all objects on the canvas
-  const allObjects = this.canvas.getObjects();
+    const allObjects = this.canvas.getObjects();
+    const maskedGroup = allObjects.filter(obj=>obj.get('name')==='maskedGroup');
+    console.log ("maskedGroup: ", maskedGroup || "none");
+    // if (maskedGroup) { 
+    //         // Get objects from the group
+    //   const objectsInGroup = maskedGroup[0].getObjects();
+    
+    //   // Unclip each object
+    //   objectsInGroup.forEach(obj => {
+    //     obj.setClipPath(null);
+    //   });
+    
+    //   // Ungroup the objects
+    //   const ungroupedObjects = this.canvas.getActiveGroup();
+    //   this.canvas.discardActiveGroup(); // Deselect the group
+    //   this.canvas.remove(ungroupedObjects); // Remove the ungrouped objects from the canvas
+    //   this.canvas.add(...ungroupedObjects.getObjects()); // Add each ungrouped object back to the canvas
+    
+    //   // Render all objects on the canvas
+    //   this.canvas.renderAll();
+    //   }
+  }
+  
 
-  // Identify and remove objects outside the canvas boundaries
-  allObjects.forEach(obj => {
-    const objBoundingBox = obj.getBoundingRect();
-    const objLeft = objBoundingBox.left;
-    const objTop = objBoundingBox.top;
-    const objRight = objLeft + objBoundingBox.width;
-    const objBottom = objTop + objBoundingBox.height;
 
-    if (objLeft < 0 || objTop < 0 || objRight > canvasWidth || objBottom > canvasHeight) {
-      // Remove the object
-      this.canvas.remove(obj);
-    }
-  });
+  removeObjectsOutsideBoundary = ()=> {
+    const canvasWidth = this.canvas.getWidth();
+    const canvasHeight = this.canvas.getHeight();
 
-  // Render all objects on the canvas
-  this.canvas.renderAll();
-}
+    // Get all objects on the canvas
+    const allObjects = this.canvas.getObjects();
+
+    // Identify and remove objects outside the canvas boundaries
+    allObjects.forEach(obj => {
+      const objBoundingBox = obj.getBoundingRect();
+      const objLeft = objBoundingBox.left;
+      const objTop = objBoundingBox.top;
+      const objRight = objLeft + objBoundingBox.width;
+      const objBottom = objTop + objBoundingBox.height;
+
+      if (objLeft < 0 || objTop < 0 || objRight > canvasWidth || objBottom > canvasHeight) {
+        // Remove the object
+        this.canvas.remove(obj);
+      }
+    });
+
+    // Render all objects on the canvas
+    this.canvas.renderAll();
+  }
 
 
   /**** working on mask function  */
@@ -216,6 +244,7 @@ removeObjectsOutsideBoundary = ()=> {
     const group = new fabric.Group(groupedObjects.slice(1));
     clipPath.set({left: -100, top: -100});
     group.clipPath = clipPath;
+    group.set ({'name': 'maskedGroup'});
     this.canvas.add(group);
     this.canvas.renderAll();
 
