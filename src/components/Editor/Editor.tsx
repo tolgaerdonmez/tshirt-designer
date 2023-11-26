@@ -417,7 +417,8 @@ class Editor extends Component<Props, State> {
                   variant="danger"
                   //disabled={this.state.selectedObjects.length === 0}
                   onClick={() => {
-                    this.state.canvasController.unclipAndUngroupObjects();
+                    this.state.canvasController.unclipObjects();
+                    this.state.canvasController.ungroupObjects();
                   }}
                 >
                 {/* <i className="fas fa-trash mr-1"></i> */}

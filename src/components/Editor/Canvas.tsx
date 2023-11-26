@@ -34,7 +34,8 @@ export interface CanvasController {
   importFromJSON: (json: object | fabric.Object) => void;
   maskEditableArea: (tShirtId: string, objects: fabric.Object[]) => void;
   removeObjectsOutsideBoundary: () => void;
-  unclipAndUngroupObjects: ()=> void;
+  unclipObjects: ()=> void;
+  ungroupObjects:()=> void;
 }
 
 export enum CanvasOrderDirection {
@@ -121,6 +122,25 @@ export default class Canvas extends Component<Props, State> {
     return result;
   }
 
+  // Force re-render
+  forceRender = (obj: fabric.Object) => {
+    if (obj.scaleX !== undefined) { 
+      const tmp = obj.scaleX;
+      // Modify a property to trigger a change
+      obj.set({ scaleX: obj.scaleX + 0.001 });
+      
+      // Set it back to its original value
+      obj.set({ scaleX: obj.scaleX});
+      
+      // Update canvas
+      this.canvas.renderAll();
+
+      // not sure if this matters but want to set 
+      // it back to its original value after force render
+      obj.set({ scaleX: tmp});
+    }
+  }
+
   selectAllObjects = ()=> {
     // Deselect any currently active object
     this.canvas.discardActiveObject();
@@ -166,32 +186,52 @@ export default class Canvas extends Component<Props, State> {
   //   this.canvas.renderAll();
   // }
 
-  unclipAndUngroupObjects = ()=>{
+  unclipObjects = ()=>{
+    const allObjects:any = this.canvas.getObjects();
+    const maskedGroup:any = allObjects.filter((obj: fabric.Object)=>obj.get('name')==='maskedGroup');
+    if (maskedGroup[0]) { 
+            // Get objects from the group
+    
+      //const group = maskedGroup[0]._objects;
+      maskedGroup[0].clipPath = null;
 
-    const allObjects = this.canvas.getObjects();
-    const maskedGroup = allObjects.filter(obj=>obj.get('name')==='maskedGroup');
-    console.log ("maskedGroup: ", maskedGroup || "none");
-    // if (maskedGroup) { 
-    //         // Get objects from the group
-    //   const objectsInGroup = maskedGroup[0].getObjects();
+      // 
+      this.forceRender(maskedGroup[0]);
     
-    //   // Unclip each object
-    //   objectsInGroup.forEach(obj => {
-    //     obj.setClipPath(null);
-    //   });
+      // // Ungroup the objects
+      // const ungroupedObjects = this.canvas.getActiveGroup();
+      // this.canvas.discardActiveGroup(); // Deselect the group
+      // this.canvas.remove(ungroupedObjects); // Remove the ungrouped objects from the canvas
+      // this.canvas.add(...ungroupedObjects.getObjects()); // Add each ungrouped object back to the canvas
     
-    //   // Ungroup the objects
-    //   const ungroupedObjects = this.canvas.getActiveGroup();
-    //   this.canvas.discardActiveGroup(); // Deselect the group
-    //   this.canvas.remove(ungroupedObjects); // Remove the ungrouped objects from the canvas
-    //   this.canvas.add(...ungroupedObjects.getObjects()); // Add each ungrouped object back to the canvas
-    
-    //   // Render all objects on the canvas
-    //   this.canvas.renderAll();
-    //   }
+      // // Render all objects on the canvas
+       this.canvas.requestRenderAll();
+      }
   }
   
+  ungroupObjects = () => { 
+    console.log ('ungroup objects');
+    const allObjects:any = this.canvas.getObjects();
+    const maskedGroup:any = allObjects.filter((obj: fabric.Object)=>obj.get('name')==='maskedGroup');
 
+    if (maskedGroup[0]) { 
+      const centerPoint:any = { top: maskedGroup[0].top + maskedGroup[0].height / 2.0, 
+                                left: maskedGroup[0].left + maskedGroup[0].width / 2.0 };
+      const objectsInGroup = maskedGroup[0].getObjects();
+      
+      // Add each object to the canvas
+      objectsInGroup.forEach((obj: fabric.Object) => {
+        obj.set({top: centerPoint.top + obj.top, left: centerPoint.left + obj.left});
+        this.canvas.add(obj);
+      });
+
+       // Remove the group from the canvas
+      this.canvas.remove(maskedGroup[0]); 
+      console.log ("All Objects: ", allObjects);
+      this.canvas.renderAll(); 
+    
+    }
+  }
 
   removeObjectsOutsideBoundary = ()=> {
     const canvasWidth = this.canvas.getWidth();
@@ -249,9 +289,11 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.renderAll();
 
     // I haven't figure out how to mask properly yet but the below lines are required
-    // for a quick fix to remove extra objects generated
+    // for a quick fix to remove extra copies of objects generated
+/******** */
     this.selectAllObjects();
     this.canvas.discardActiveObject();
+    
     //this.removeObjectsOutsideBoundary();
 
     //this.canvas.renderAll();
