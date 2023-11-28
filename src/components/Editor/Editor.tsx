@@ -6,6 +6,7 @@ import {
   InputGroup,
   FormControl,
   ButtonGroup,
+  Form
 } from "react-bootstrap";
 
 import Canvas, { CanvasController, CanvasOrderDirection } from "./Canvas";
@@ -36,6 +37,7 @@ interface State {
   textureImgPath: string;
   tshirtId: string;
   tshirtColor: string;
+  isEditableAreaVisible: boolean;
   [key: string]: any;
 }
 
@@ -58,7 +60,8 @@ class Editor extends Component<Props, State> {
     currentColor: "rgba(255,255,255,255)",
     textureImgPath: "",
     tshirtId: "tshirt_0001",
-    tshirtColor: "#333333"
+    tshirtColor: "#333333",
+    isEditableAreaVisible: false
   };
 
   // SH 6/5/2023
@@ -342,8 +345,7 @@ class Editor extends Component<Props, State> {
                             canvasController.addText(
                               this.state.textInput,
                               this.state.textFont,
-                              fillColor
-                            );
+                              fillColor                            );
                           else
                             canvasController.updateText(
                               this.state.selectedObjects[0] as fabric.Textbox,
@@ -423,7 +425,21 @@ class Editor extends Component<Props, State> {
                 >
                 {/* <i className="fas fa-trash mr-1"></i> */}
                   Unclip mask
-                </Button>   
+                </Button> 
+                <Form>
+                  <Form.Check 
+                    type="checkbox" 
+                    id="myCheckbox" 
+                    label="Hide Editable Area"
+                    onChange={
+                      (e:any)=>{
+                        const checked = e.currentTarget.checked;
+                        this.state.canvasController.toggleEditableArea(checked)
+                        this.setState({isEditableAreaVisible: checked})
+                      } 
+                    }
+                    />
+                </Form>
                 </Row>
               </>
             ) : null}

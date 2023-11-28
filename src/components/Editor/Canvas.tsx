@@ -36,6 +36,7 @@ export interface CanvasController {
   removeObjectsOutsideBoundary: () => void;
   unclipObjects: ()=> void;
   ungroupObjects:()=> void;
+  toggleEditableArea: (show:boolean)=> void;
 }
 
 export enum CanvasOrderDirection {
@@ -55,7 +56,8 @@ interface Props {
   tshirt?: string;
   controller?: (controller: CanvasController) => void;
 }
-interface State {}
+interface State {
+}
 
 
 // const loadImage = (url: string) => {
@@ -70,7 +72,7 @@ interface State {}
 //     });
 // }
 
-const createMaskArea = (mask: any) => {
+const createEditableArea = (mask: any) => {
   return new fabric.Rect({
     left: mask.offsetLeft,
     top: mask.offsetTop,
@@ -86,17 +88,6 @@ const createMaskArea = (mask: any) => {
     strokeDashArray: [5, 2], // Dashed border pattern
   });
 }
-// just for test
-const createMask = (mask: any) => {
-  return new fabric.Rect({
-    left: mask.offsetLeft,
-    top: mask.offsetTop,
-    width: mask.w,
-    height: mask.h,
-    name: "maskLayer"
-  });
-}
-
 export default class Canvas extends Component<Props, State> {
   canvas!: fabric.Canvas;
 
@@ -104,7 +95,6 @@ export default class Canvas extends Component<Props, State> {
     //creating the canvas
     //this.canvas = new fabric.Canvas("c", { renderOnAddRemove: true });
     this.canvas = new fabric.Canvas("c");
-
     if (this.props.controller !== undefined)
       this.props.controller({ ...(this as CanvasController) });
     // setting the background image
@@ -250,7 +240,8 @@ export default class Canvas extends Component<Props, State> {
 
       if (objLeft < 0 || objTop < 0 || objRight > canvasWidth || objBottom > canvasHeight) {
         // Remove the object
-        this.canvas.remove(obj);
+        if (obj.get('name')!=='maskedGroup')
+          this.canvas.remove(obj);
       }
     });
 
@@ -258,33 +249,44 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.renderAll();
   }
 
+  toggleEditableArea = (show:boolean) => { 
+    const allObjects = this.canvas.getObjects();
+    const editableArea:any = allObjects.find((obj) => obj.name === "editableArea");
+    editableArea.set({visible: show});
+    this.canvas.renderAll();
+  }
 
   /**** working on mask function  */
   /**** version 1 */
   maskEditableArea = (tShirtId: string, objects: fabric.Object[]) => { 
-    const w: number = this.canvas.getWidth(),
-          h: number = this.canvas.getHeight();
-    // const mask = {w: 50, h: 50, offsetLeft: 0, offsetTop: 0};
-    let mask = (tShirtId === 'tshirt_0001') ?
-      { w: 200, h: 200, offsetLeft: 0, offsetTop: 0 } :
-      { w: 180, h: 275, offsetLeft: (w - 180) / 2, offsetTop: 20 + (h - 275) / 2 };
-    const clipPath = createMask(mask);
-
     const allObjects = this.canvas.getObjects();
     let groupedObjects:any = [];
-    allObjects.forEach((object)=>{
-      if (object.get('name') !== "maskLayer" || object.get('name') !=="maskedArea")
-        groupedObjects.push(object);
+    allObjects.forEach((obj)=>{
+      if (obj.get('name') !== "maskLayer" || obj.get('name') !=="editableArea")
+        groupedObjects.push(obj);
     });
 
-    groupedObjects.forEach((object: any)=>{
-      console.log ("object: ", object);
-    });
+     
+    // groupedObjects.forEach((object: any)=>{
+    //   console.
+    // });
     //const clipPathGroup = new fabric.Group(groupedObjects, { originX: 'left', originY: 'top' });
-    const group = new fabric.Group(groupedObjects.slice(1));
-    clipPath.set({left: -100, top: -100});
+    const group:any = new fabric.Group(groupedObjects.slice(1));
+    const editableArea:any = allObjects.find((obj) => obj.name === "editableArea");
+    const groupCenterCoords:any = { top: (group.top + group.height / 2.0), left: (group.left + group.width / 2.0) };
+    const maskedGroupCenterCoords:any = { top: editableArea.top - groupCenterCoords.top, 
+                                        left: editableArea.left - groupCenterCoords.left, 
+                                        width: editableArea.width,
+                                        height: editableArea.height
+                                      };
+    // const centerCoords = editableArea?
+    //   { top: editableArea.top + editableArea.height / 2.0, left: editableArea.left + editableArea.width / 2.0 }:
+    //   { top: -100, left: -100};
+    let clipPath:any = new fabric.Rect ({...maskedGroupCenterCoords});
     group.clipPath = clipPath;
     group.set ({'name': 'maskedGroup'});
+    
+
     this.canvas.add(group);
     this.canvas.renderAll();
 
@@ -328,13 +330,13 @@ export default class Canvas extends Component<Props, State> {
       let mask = (tShirtId === 'tshirt_0001')?
         { w: 200, h: 300, offsetLeft: (w - 200) / 2, offsetTop: 20 + (h - 300) / 2 }:
         { w: 180, h: 275, offsetLeft: (w - 180) / 2, offsetTop: 20 + (h - 275) / 2 };
-      const editableArea = createMaskArea(mask);
+      const editableArea = createEditableArea(mask);
 
       this.canvas.add(editableArea);
       this.canvas.sendToBack(editableArea);
 
       // Add both the mask and content to the canvas
-      this.canvas.renderAll()
+      this.canvas.renderAll();
     });
   };
 
