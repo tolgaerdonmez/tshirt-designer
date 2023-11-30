@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { fabric } from "fabric";
 import { saveAs } from "file-saver";
+import "./Canvas.css";
 
 export interface CanvasController {
   canvas: fabric.Canvas;
@@ -37,6 +38,7 @@ export interface CanvasController {
   unclipObjects: ()=> void;
   ungroupObjects:()=> void;
   toggleEditableArea: (show:boolean)=> void;
+  forceRender: (obj:fabric.Object)=>void;
 }
 
 export enum CanvasOrderDirection {
@@ -44,11 +46,6 @@ export enum CanvasOrderDirection {
   forwards = "forwards",
   back = "back",
   front = "front",
-}
-
-export enum Color {
-  white = "rgba(255, 255, 255, 255)",
-  black = "rgba(0, 0, 0, 0)",
 }
 
 interface Props {
@@ -147,60 +144,19 @@ export default class Canvas extends Component<Props, State> {
     }
   }
 
-  // deleteObjectsOutsideBoundary = ()=>{
-  //   const canvasWidth = this.canvas.getWidth();
-  //   const canvasHeight = this.canvas.getHeight();
-
-  //   // Get all objects on the canvas
-  //   const allObjects = this.canvas.getObjects();
-
-  //   // Filter out objects outside the canvas boundaries
-  //   const objectsInsideBoundary = allObjects.filter(obj => {
-  //     const objBoundingBox = obj.getBoundingRect();
-  //     console.log ('objBoundingBox: ', objBoundingBox);
-  //     const objLeft = objBoundingBox.left;
-  //     const objTop = objBoundingBox.top;
-  //     const objRight = objLeft + objBoundingBox.width;
-  //     const objBottom = objTop + objBoundingBox.height;
-
-  //     return objLeft >= 0 && objTop >= 0 && objRight <= canvasWidth && objBottom <= canvasHeight;
-  //   });
-
-  //   // Remove all objects from the canvas
-  //   this.canvas.clear();
-  //   console.log ('objectsInsideBoundary: ', objectsInsideBoundary);
-  //   // Add objects inside the boundary back to the canvas
-  //   this.canvas.add(...objectsInsideBoundary);
-
-  //   // Render all objects on the canvas
-  //   this.canvas.renderAll();
-  // }
 
   unclipObjects = ()=>{
     const allObjects:any = this.canvas.getObjects();
     const maskedGroup:any = allObjects.filter((obj: fabric.Object)=>obj.get('name')==='maskedGroup');
     if (maskedGroup[0]) { 
-            // Get objects from the group
-    
-      //const group = maskedGroup[0]._objects;
       maskedGroup[0].clipPath = null;
-
-      // 
       this.forceRender(maskedGroup[0]);
-    
-      // // Ungroup the objects
-      // const ungroupedObjects = this.canvas.getActiveGroup();
-      // this.canvas.discardActiveGroup(); // Deselect the group
-      // this.canvas.remove(ungroupedObjects); // Remove the ungrouped objects from the canvas
-      // this.canvas.add(...ungroupedObjects.getObjects()); // Add each ungrouped object back to the canvas
-    
-      // // Render all objects on the canvas
+        // Render all objects on the canvas
        this.canvas.requestRenderAll();
       }
   }
   
   ungroupObjects = () => { 
-    console.log ('ungroup objects');
     const allObjects:any = this.canvas.getObjects();
     const maskedGroup:any = allObjects.filter((obj: fabric.Object)=>obj.get('name')==='maskedGroup');
 
@@ -217,7 +173,6 @@ export default class Canvas extends Component<Props, State> {
 
        // Remove the group from the canvas
       this.canvas.remove(maskedGroup[0]); 
-      console.log ("All Objects: ", allObjects);
       this.canvas.renderAll(); 
     
     }
@@ -251,13 +206,13 @@ export default class Canvas extends Component<Props, State> {
 
   toggleEditableArea = (show:boolean) => { 
     const allObjects = this.canvas.getObjects();
-    const editableArea:any = allObjects.find((obj) => obj.name === "editableArea");
-    editableArea.set({visible: show});
-    this.canvas.renderAll();
+    const editableArea:fabric.Object | undefined = allObjects.find((obj) => obj.name === "editableArea");
+    if (editableArea) { 
+      editableArea.set({visible: !show});
+      this.canvas.renderAll();
+    }
   }
 
-  /**** working on mask function  */
-  /**** version 1 */
   maskEditableArea = (tShirtId: string, objects: fabric.Object[]) => { 
     const allObjects = this.canvas.getObjects();
     let groupedObjects:any = [];
@@ -266,11 +221,6 @@ export default class Canvas extends Component<Props, State> {
         groupedObjects.push(obj);
     });
 
-     
-    // groupedObjects.forEach((object: any)=>{
-    //   console.
-    // });
-    //const clipPathGroup = new fabric.Group(groupedObjects, { originX: 'left', originY: 'top' });
     const group:any = new fabric.Group(groupedObjects.slice(1));
     const editableArea:any = allObjects.find((obj) => obj.name === "editableArea");
     const groupCenterCoords:any = { top: (group.top + group.height / 2.0), left: (group.left + group.width / 2.0) };
@@ -279,9 +229,7 @@ export default class Canvas extends Component<Props, State> {
                                         width: editableArea.width,
                                         height: editableArea.height
                                       };
-    // const centerCoords = editableArea?
-    //   { top: editableArea.top + editableArea.height / 2.0, left: editableArea.left + editableArea.width / 2.0 }:
-    //   { top: -100, left: -100};
+
     let clipPath:any = new fabric.Rect ({...maskedGroupCenterCoords});
     group.clipPath = clipPath;
     group.set ({'name': 'maskedGroup'});
@@ -292,26 +240,20 @@ export default class Canvas extends Component<Props, State> {
 
     // I haven't figure out how to mask properly yet but the below lines are required
     // for a quick fix to remove extra copies of objects generated
-/******** */
     this.selectAllObjects();
     this.canvas.discardActiveObject();
     
-    //this.removeObjectsOutsideBoundary();
-
-    //this.canvas.renderAll();
     this.canvas.requestRenderAll();
   }
 
   setBackground = (tShirtId: string) => {
     
     fabric.Image.fromURL(this.getPathById(tShirtId), (img) => {
-      console.log("set background tshirt id: ", this.getPathById(tShirtId));
-      //img.center();
       const h: number = img.getScaledHeight();
       const w: number = img.getScaledWidth();
       this.canvas.setHeight(h);
       this.canvas.setWidth(w);
-
+      
       // Set the clipPath property on the content object to use the mask
       img.set({
         left: 0,
@@ -323,7 +265,6 @@ export default class Canvas extends Component<Props, State> {
 
       var retrievedObject = this.getItemByName('editableArea');
       if (retrievedObject) {
-        console.log('Retrieved object:', retrievedObject);
         this.canvas.remove(retrievedObject);
       }
 
@@ -345,14 +286,12 @@ export default class Canvas extends Component<Props, State> {
   };
   
   addImage = () => {
-    console.log("adding image");
     fabric.Image.fromURL("images/logo512.png", (img: fabric.Image) => {
       this.canvas.add(img);
     });
   };
 
   addText = (text: string, fontFamily: string, textColor: string) => {
-    console.log ("addText, fontFamily: ", fontFamily);
     const [w, h]: number[] = [this.canvas.getWidth(), this.canvas.getHeight()];
     let t = new fabric.Textbox(text, {
       left: w / 4,
@@ -372,7 +311,6 @@ export default class Canvas extends Component<Props, State> {
     text: string,
     fontFamily: string
   ) => {
-    console.log("Update Text, fontFamily: ", fontFamily);
     textObj.set({ text: text, fontFamily: fontFamily});
     this.canvas.renderAll();
   };
@@ -381,7 +319,6 @@ export default class Canvas extends Component<Props, State> {
     textObj: fabric.Textbox,
     textColor: string
   ) => {
-    console.log("Update Text Color, textColor: ", textColor);
     textObj.set({ fill: textColor});
     this.canvas.renderAll();
   };
@@ -403,7 +340,6 @@ export default class Canvas extends Component<Props, State> {
         this.canvas.renderAll.bind(this.canvas)
       );
     });
-    console.log("updateTShirtColor, tshirtId: ", tshirtId);
   };
 
   updateTexture = (textureImgPath: string, tshirtId: string) => {
@@ -419,7 +355,6 @@ export default class Canvas extends Component<Props, State> {
       this.canvas.remove(svgObject);
 
     let svgUrl = this.getPathById(tshirtId);
-    console.log("updateTexture, tshirtId: ", tshirtId);
     fabric.loadSVGFromURL(svgUrl, (objects) => {
       fabric.util.loadImage(textureImgPath, (img) => {
         objects.forEach((obj, i) => {
@@ -520,7 +455,6 @@ export default class Canvas extends Component<Props, State> {
         });
       }
     } catch (error) {
-      console.log(error);
       window.alert("Try downloading again!");
     }
   };
@@ -530,17 +464,14 @@ export default class Canvas extends Component<Props, State> {
       fileName = fileName.replace(/([^a-z0-9 ]+)/gi, "-");
       const data = JSON.stringify(this.canvas.toJSON());
       var blob = new Blob([data], { type: "application/json" });
-      console.log(data);
       saveAs(blob, fileName + ".tdp");
     } catch (error) {
-      console.log(error);
       window.alert("Try downloading again!");
     }
   };
 
   importFromJSON = (json: object | fabric.Object) => {
     this.canvas.loadFromJSON(json, () => {
-      console.log("uploaded");
       this.canvas.renderAll();
     });
   };

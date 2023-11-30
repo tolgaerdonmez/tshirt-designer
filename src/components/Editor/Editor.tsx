@@ -22,7 +22,15 @@ import { google_access_key } from "../../config.json";
 import ColorSelector from "../ColorSelector/SketchPicker";
 import Thumbnail from "../Thumbnail/Thumbnail";
 import PreviewModal from "../Modals/Image/PreviewModel";
-//import { isThisTypeNode } from "typescript";
+import TextLoader from "../TextLoader/TextLoader";
+
+import {
+  DEFAULT_FG,
+  DEFAULT_FONT,
+  DEFAULT_TSHIRT_COLOR,
+  DEFAULT_TSHIRT_ID,
+  Color
+} from "../../config/constants";
 
 interface Props {}
 interface State {
@@ -37,7 +45,7 @@ interface State {
   textureImgPath: string;
   tshirtId: string;
   tshirtColor: string;
-  isEditableAreaVisible: boolean;
+  isEditableAreaInvisible: boolean;
   [key: string]: any;
 }
 
@@ -53,15 +61,15 @@ class Editor extends Component<Props, State> {
     canvasController: {} as CanvasController,
     editorReady: false,
     textInput: "",
-    textFont: "Open Sans",
+    textFont: DEFAULT_FONT,
     editing: false,
     selectedObjects: [] as fabric.Object[],
-    foreground: "#FFFFFF",
-    currentColor: "rgba(255,255,255,255)",
+    foreground: DEFAULT_FG,
+    currentColor: Color.white,
     textureImgPath: "",
-    tshirtId: "tshirt_0001",
-    tshirtColor: "#333333",
-    isEditableAreaVisible: false
+    tshirtId: DEFAULT_TSHIRT_ID,
+    tshirtColor: DEFAULT_TSHIRT_COLOR,
+    isEditableAreaInvisible: false
   };
 
   // SH 6/5/2023
@@ -75,13 +83,6 @@ class Editor extends Component<Props, State> {
       () => {
         // Get all elements in the HTML document
         const inputElements = document.querySelectorAll("input");
-
-        console.log("onHandleChangeComplete, inputElements: ", inputElements);
-        console.log(
-          "onHandleChangeComplete, selectedObjects: ",
-          this.state.selectedObjects
-        );
-
         // Check if all elements are not selected
         const allNotActive = Array.from(inputElements).every(
           (element) => !element.disabled
@@ -105,8 +106,6 @@ class Editor extends Component<Props, State> {
 
   // dom textbox onchange event
   handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log("handleOnChange e.target.name: ", e.target.name);
-    console.log("handleOnChange e.target.value: ", e.target.value);
     this.setState({ [e.target.name]: e.target.value });
     if (this.state.editing) {
       this.state.canvasController.updateText(
@@ -124,39 +123,52 @@ class Editor extends Component<Props, State> {
     });
   }
 
+  loadFont = () => {
+    const textLoaderClass:string = "spinner-border text-primary spinner-";
+
+    const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}off`)[0];
+    if (textLoader) {
+      textLoader.className = `${textLoaderClass}on`;
+      const parentNode:Element = document.getElementsByClassName ("canvas-container")[0];
+      const spinnerContainer:Element = document.getElementsByClassName ("spinner-container")[0];
+      parentNode.appendChild(spinnerContainer);
+    }
+    // This is ugly but I have to dig deeper into the dependencies to
+    // find its async function.
+    // Just a temp fix by timing it.
+    setTimeout (()=>{
+        this.state.canvasController.forceRender(this.state.selectedObjects[0]);
+        const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}on`)[0];
+        if (textLoader)
+          textLoader.className = `${textLoaderClass}off`;
+    }, 2000);  
+  }
+
   initCanvasController = (controller: CanvasController) => {
     controller.canvas.on("mouse:down", () => {
-      console.log ("controller.canvas.on mouse:down");
       const selected = controller.canvas.getActiveObjects();
       const textbox = selected[0];
       const canEdit = (selected.length === 1 && textbox.isType("textbox"));
       if (selected.length > 0) {
-        selected.forEach((obj)=>{
-          const objBoundingBox = obj.getBoundingRect();
-          console.log ("objBoundingBox: ", objBoundingBox);
-        });
-
-        console.log ('selected.length > 0, selected: ', selected);
         this.setState({
           selectedObjects: selected,
           editing: canEdit,
           textInput: canEdit ? (textbox as any).text : "",
-          textFont: canEdit ? (textbox as any).fontFamily : "Open Sans",
+          textFont: canEdit ? (textbox as any).fontFamily : DEFAULT_FONT,
           currentColor: canEdit
             ? (textbox as any).fill
-            : "rgba(255,255,255,255)",
+            : Color.white,
         }, ()=> { 
           if (canEdit)
             this.syncText(textbox);  // to ensure canvas text matches html textbox value
         });      
       } else {
-        console.log ('selected.length <= 0, selected: ', selected);
         this.setState({
           selectedObjects: [],
           editing: false,
           textInput: "",
-          textFont: "Open Sans",
-          currentColor: "rgba(255,255,255,255)",
+          textFont: DEFAULT_FONT,
+          currentColor: Color.white,
         });
       }
     });
@@ -166,7 +178,7 @@ class Editor extends Component<Props, State> {
         this.setState({
           selectedObjects: selected
         });
-    });
+    }); 
 
     this.setState({ canvasController: controller, editorReady: true });
   };
@@ -177,13 +189,12 @@ class Editor extends Component<Props, State> {
       <div className="my-5 mx-5">
         <Row>
           <Col>
-            <Canvas
-              tShirtId="tshirt_0001"
-              tshirt="tshirt"
-              controller={(controller) => this.initCanvasController(controller)}
-            />
-            {/* Object options */}
-            <div className="mt-3">           
+              <Canvas
+                tShirtId="tshirt_0001"
+                tshirt="tshirt"
+                controller={(controller) => this.initCanvasController(controller)} />
+              <TextLoader className="spinner-off"/>
+              <div className="mt-3">           
               <Button
                 variant="danger"
                 disabled={this.state.selectedObjects.length === 0}
@@ -250,7 +261,6 @@ class Editor extends Component<Props, State> {
                     imageUrl="images/textures/01.jpg"
                     handleSelection={(e: any) => {
                       // map texture
-                      console.log(e.target.getAttribute("src"));
                       canvasController.updateTexture(
                         e.target.getAttribute("src"),
                         this.state.tshirtId
@@ -301,23 +311,23 @@ class Editor extends Component<Props, State> {
                         apiKey={google_access_key}
                         activeFontFamily={this.state.textFont}
                         onChange={(nextFont) => {
-                          console.log ("FontPicker, textFont, setState nextFont.family: ", nextFont.family);
                           this.setState({
                             textFont: nextFont.family,
-                          }, ()=>{ 
-                            console.log ("FontPicker, font family changed, state: ", this.state);
-                            if (this.state.editing)
+                          }, ()=>{
+                            if (this.state.editing) {
                               canvasController.updateText(
                                 this.state.selectedObjects[0] as fabric.Textbox,
                                 this.state.textInput,
                                 this.state.textFont
                               );
+
+                              this.loadFont();
+                            }
                           });
                         }}
                         
                         setActiveFontCallback={() => {
                            console.log ("setActiveFontCallback");
-                           this.state.canvasController.canvas.renderAll();
                         }}
                       />
                     </InputGroup.Prepend>
@@ -335,8 +345,6 @@ class Editor extends Component<Props, State> {
                       <Button
                         className="h-"
                         onClick={() => {
-                          console.log("canvasController", canvasController);
-                          console.log("state", this.state);
                           const fillColor =
                             this.state.foreground !== this.state.tshirtColor
                               ? this.state.foreground
@@ -399,7 +407,6 @@ class Editor extends Component<Props, State> {
                   onClick={() => {
                     this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
                     this.state.canvasController.removeObjectsOutsideBoundary();
-                    console.log ("stop here");
                   }}
                 >
                 {/* <i className="fas fa-trash mr-1"></i> */}
@@ -432,10 +439,10 @@ class Editor extends Component<Props, State> {
                     id="myCheckbox" 
                     label="Hide Editable Area"
                     onChange={
-                      (e:any)=>{
+                      (e:React.ChangeEvent<HTMLInputElement>)=>{
                         const checked = e.currentTarget.checked;
                         this.state.canvasController.toggleEditableArea(checked)
-                        this.setState({isEditableAreaVisible: checked})
+                        this.setState({isEditableAreaInvisible: checked})
                       } 
                     }
                     />
