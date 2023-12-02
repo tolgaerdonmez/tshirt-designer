@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 125px;
+            /* Updated width */
+            background-color: #888;
+            /* Lighter background color */
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        .content {
+            margin-left: 125px;
+            padding: 16px;
+        }
+
+        /* Optional styles for better visibility */
+        a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            border-bottom: 1px solid #666;
+        }
+
+        a:hover {
+            background-color: #333;
+        }
+    </style>
+    <title>Fixed Sidebar Example</title>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <a href="#">Link 1</a>
+        <a href="#">Link 2</a>
+        <a href="#">Link 3</a>
+        <a href="#">Link 4</a>
+        <a href="#">Link 5</a>
+        <a href="#">Link 6</a>
+        <a href="#">Link 7</a>
+        <a href="#">Link 8</a>
+        <!-- Add more links as needed -->
+    </div>
+
+    <div class="content">
+        <!-- Your main content goes here -->
+        <h2>Main Content</h2>
+        <p>This is the main content area.</p>
+    </div>
+
+</body>
+
+</html>

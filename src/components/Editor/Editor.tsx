@@ -3,14 +3,11 @@ import {
   Col,
   Row,
   Button,
-  InputGroup,
-  FormControl,
   ButtonGroup,
   Form
 } from "react-bootstrap";
 
-import Canvas, { CanvasController, CanvasOrderDirection } from "./Canvas";
-import FontPicker from "../CustomFontPicker";
+import Canvas, { CanvasController, CanvasOrderDirection } from "../Canvas/Canvas";
 import ImageUploadModal from "../Modals/Image/ImageUploadModal";
 import ExportImageModal from "../Modals/Image/ExportImageModal";
 import ImportProjectModal from "../Modals/Project/ImportProjectModal";
@@ -18,10 +15,11 @@ import ExportProjectModal from "../Modals/Project/ExportProjectModal";
 import "./Editor.css";
 
 import { fabric } from "fabric";
-import { google_access_key } from "../../config.json";
 import ColorSelector from "../ColorSelector/SketchPicker";
 import Thumbnail from "../Thumbnail/Thumbnail";
 import PreviewModal from "../Modals/Image/PreviewModel";
+import TextEditingTool from "../TextEditingTool/TextEditingTool";
+import SideMenu from "../SideMenu/SideMenu";
 import TextLoader from "../TextLoader/TextLoader";
 
 import {
@@ -72,6 +70,17 @@ class Editor extends Component<Props, State> {
     isEditableAreaInvisible: false
   };
 
+  syncText = (textbox:any)=> { 
+    const self = this as Editor;
+    textbox.on ('change', function () {
+      self.setState({textInput: textbox.text})
+    });
+  }
+
+  setEditorState = (stateProperties:object, callback?:()=>void) => {
+    this.setState({...stateProperties}, callback);
+  };
+
   // SH 6/5/2023
   // raising ColorSelector Event
   onHandleChangeComplete = (color: any) => {
@@ -105,44 +114,26 @@ class Editor extends Component<Props, State> {
   };
 
   // dom textbox onchange event
-  handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ [e.target.name]: e.target.value });
-    if (this.state.editing) {
-      this.state.canvasController.updateText(
-        this.state.selectedObjects[0] as fabric.Textbox,
-        this.state.textInput,
-        this.state.textFont,
-      );
-    }
-  };
-
-  syncText = (textbox:any)=> { 
-    const self = this as Editor;
-    textbox.on ('change', function () {
-      self.setState({textInput: textbox.text})
-    });
-  }
-
-  loadFont = () => {
-    const textLoaderClass:string = "spinner-border text-primary spinner-";
-
-    const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}off`)[0];
-    if (textLoader) {
-      textLoader.className = `${textLoaderClass}on`;
-      const parentNode:Element = document.getElementsByClassName ("canvas-container")[0];
-      const spinnerContainer:Element = document.getElementsByClassName ("spinner-container")[0];
-      parentNode.appendChild(spinnerContainer);
-    }
+    loadFont = () => {
+      const textLoaderClass:string = "spinner-border text-primary spinner-";
+      const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}off`)[0];
+      console.log ('textLoader: ', textLoader);
+      if (textLoader) {
+          textLoader.className = `${textLoaderClass}on`;
+          const parentNode:Element = document.getElementsByClassName ("canvas-container")[0];
+          const spinnerContainer:Element = document.getElementsByClassName ("spinner-container")[0];
+          parentNode.appendChild(spinnerContainer);
+      }
     // This is ugly but I have to dig deeper into the dependencies to
     // find its async function.
     // Just a temp fix by timing it.
-    setTimeout (()=>{
-        this.state.canvasController.forceRender(this.state.selectedObjects[0]);
-        const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}on`)[0];
-        if (textLoader)
-          textLoader.className = `${textLoaderClass}off`;
-    }, 2000);  
-  }
+      setTimeout (()=>{
+          this.state.canvasController.forceRender(this.state.selectedObjects[0]);
+          const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}on`)[0];
+          if (textLoader)
+              textLoader.className = `${textLoaderClass}off`;
+      }, 2000);
+    }
 
   initCanvasController = (controller: CanvasController) => {
     controller.canvas.on("mouse:down", () => {
@@ -186,273 +177,212 @@ class Editor extends Component<Props, State> {
   render() {
     const { canvasController } = this.state;
     return (
-      <div className="my-5 mx-5">
-        <Row>
-          <Col>
-              <Canvas
-                tShirtId="tshirt_0001"
-                tshirt="tshirt"
-                controller={(controller) => this.initCanvasController(controller)} />
-              <TextLoader className="spinner-off"/>
-              <div className="mt-3">           
-              <Button
-                variant="danger"
-                disabled={this.state.selectedObjects.length === 0}
-                onClick={() => {
-                  canvasController.deleteObjects(this.state.selectedObjects);
-                  this.setState({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
-                }}
-              >
-                <i className="fas fa-trash mr-1"></i>
-                Delete Selected
-              </Button>
-              <ButtonGroup aria-label="change object order" className="ml-2">
-                {Object.keys(CanvasOrderDirection).map((direction) => (
-                  <Button
-                    key={direction}
-                    variant="warning"
-                    disabled={this.state.selectedObjects.length === 0}
-                    onClick={() =>
-                      this.state.canvasController.changeObjectOrder(
-                        this.state.selectedObjects,
-                        direction
-                      )
-                    }
-                  >
-                    {direction}
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </div>
-          </Col>
-          <Col className="d-flex flex-column">
-            <Row>
-              <h1>Editor</h1>
-            </Row>
-            {/* Editor Panel */}
-            {this.state.editorReady ? (
-              <>
-                <Row>
-                  <ImageUploadModal
-                    canvas={this.state.canvasController.canvas}
-                  />
-                </Row>
-                <Row>
-                  <Thumbnail
-                    imageUrl="images/tshirt.svg"
-                    handleSelection={() => {
-                      this.setState({ tshirtId: "tshirt_0001" }, () => {
-                        canvasController.setTShirt(this.state.tshirtId);
-                      });
-                    }}
-                  />
-                  <Thumbnail
-                    imageUrl="images/tshirt2.svg"
-                    handleSelection={() => {
-                      this.setState({ tshirtId: "tshirt_0002" }, () => {
-                        canvasController.setTShirt(this.state.tshirtId);
-                      });
-                    }}
-                  />
-                </Row>
+      <>
+        {/* <div className="my-5 mx-5"> */}
+        <div>
+          <Row>
+            <Col xs={3} style={{ position: 'fixed', height: '100vh', width: '120px', backgroundColor: '#f8f9fa', padding: '0px', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)', overflowY: 'auto' }}>
+            {/* Sidebar content goes here */}
+              <SideMenu canvas={this.state.canvasController.canvas} />
+            </Col>
+            <Col xs={9} style={{ marginLeft: '125px', padding: '20px' }}>
+                <Canvas
+                  tShirtId="tshirt_0001"
+                  tshirt="tshirt"
+                  controller={(controller) => this.initCanvasController(controller)} />
+                <TextLoader className="spinner-off"/>
+                <div className="mt-3">           
+                <Button
+                  variant="danger"
+                  disabled={this.state.selectedObjects.length === 0}
+                  onClick={() => {
+                    canvasController.deleteObjects(this.state.selectedObjects);
+                    this.setState({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
+                  }}
+                >
+                  <i className="fas fa-trash msr-1"></i>
+                  Delete Selected
+                </Button>
+                <ButtonGroup aria-label="change object order" className="ml-2">
+                  {Object.keys(CanvasOrderDirection).map((direction) => (
+                    <Button
+                      key={direction}
+                      variant="warning"
+                      disabled={this.state.selectedObjects.length === 0}
+                      onClick={() =>
+                        this.state.canvasController.changeObjectOrder(
+                          this.state.selectedObjects,
+                          direction
+                        )
+                      }
+                    >
+                      {direction}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </div>
+              <div className="mt-3">  
+                <TextEditingTool setEditorState={this.setEditorState} editorState={this.state} loadFont={this.loadFont}/>
+              </div>
+            </Col>
+            <Col className="d-flex flex-column">
+              <Row>
+                <h1>Editor</h1>
+              </Row>
+              {/* Editor Panel */}
+              {this.state.editorReady ? (
+                <>
+                  <Row>
+                    <ImageUploadModal
+                      canvas={this.state.canvasController.canvas}
+                    />
+                  </Row>
+                  <Row>
+                    <Thumbnail
+                      imageUrl="images/tshirt.svg"
+                      handleSelection={() => {
+                        this.setState({ tshirtId: "tshirt_0001" }, () => {
+                          canvasController.setTShirt(this.state.tshirtId);
+                        });
+                      }}
+                    />
+                    <Thumbnail
+                      imageUrl="images/tshirt2.svg"
+                      handleSelection={() => {
+                        this.setState({ tshirtId: "tshirt_0002" }, () => {
+                          canvasController.setTShirt(this.state.tshirtId);
+                        });
+                      }}
+                    />
+                  </Row>
 
-                <Row>
-                  <Thumbnail
-                    imageUrl="images/textures/01.jpg"
-                    handleSelection={(e: any) => {
-                      // map texture
-                      canvasController.updateTexture(
-                        e.target.getAttribute("src"),
-                        this.state.tshirtId
-                      );
-                    }}
-                  />
-                  <Thumbnail
-                    imageUrl="images/textures/02.jpg"
-                    handleSelection={(e: any) => {
-                      canvasController.updateTexture(
-                        e.target.getAttribute("src"),
-                        this.state.tshirtId
-                      );
-                    }}
-                  />
-                  <Thumbnail
-                    imageUrl="images/textures/03.jpg"
-                    handleSelection={(e: any) => {
-                      canvasController.updateTexture(
-                        e.target.getAttribute("src"),
-                        this.state.tshirtId
-                      );
-                    }}
-                  />
-                  <Thumbnail
-                    imageUrl="images/textures/04.jpg"
-                    handleSelection={(e: any) => {
-                      canvasController.updateTexture(
-                        e.target.getAttribute("src"),
-                        this.state.tshirtId
-                      );
-                    }}
-                  />
-                  <Thumbnail
-                    imageUrl="images/textures/05.jpg"
-                    handleSelection={(e: any) => {
-                      canvasController.updateTexture(
-                        e.target.getAttribute("src"),
-                        this.state.tshirtId
-                      );
-                    }}
-                  />
-                </Row>
-                <Row>
-                  <InputGroup className="my-3">
-                    <InputGroup.Prepend>
-                      <FontPicker
-                        apiKey={google_access_key}
-                        activeFontFamily={this.state.textFont}
-                        onChange={(nextFont) => {
-                          this.setState({
-                            textFont: nextFont.family,
-                          }, ()=>{
-                            if (this.state.editing) {
-                              canvasController.updateText(
-                                this.state.selectedObjects[0] as fabric.Textbox,
-                                this.state.textInput,
-                                this.state.textFont
-                              );
-
-                              this.loadFont();
-                            }
-                          });
-                        }}
-                        
-                        setActiveFontCallback={() => {
-                           console.log ("setActiveFontCallback");
-                        }}
+                  <Row>
+                    <Thumbnail
+                      imageUrl="images/textures/01.jpg"
+                      handleSelection={(e: any) => {
+                        // map texture
+                        canvasController.updateTexture(
+                          e.target.getAttribute("src"),
+                          this.state.tshirtId
+                        );
+                      }}
+                    />
+                    <Thumbnail
+                      imageUrl="images/textures/02.jpg"
+                      handleSelection={(e: any) => {
+                        canvasController.updateTexture(
+                          e.target.getAttribute("src"),
+                          this.state.tshirtId
+                        );
+                      }}
+                    />
+                    <Thumbnail
+                      imageUrl="images/textures/03.jpg"
+                      handleSelection={(e: any) => {
+                        canvasController.updateTexture(
+                          e.target.getAttribute("src"),
+                          this.state.tshirtId
+                        );
+                      }}
+                    />
+                    <Thumbnail
+                      imageUrl="images/textures/04.jpg"
+                      handleSelection={(e: any) => {
+                        canvasController.updateTexture(
+                          e.target.getAttribute("src"),
+                          this.state.tshirtId
+                        );
+                      }}
+                    />
+                    <Thumbnail
+                      imageUrl="images/textures/05.jpg"
+                      handleSelection={(e: any) => {
+                        canvasController.updateTexture(
+                          e.target.getAttribute("src"),
+                          this.state.tshirtId
+                        );
+                      }}
+                    />
+                  </Row>
+                  <Row className="d-flex justify-content-center">
+                    <ColorSelector
+                      color={this.state.foreground}
+                      handleChangeComplete={(color: string) => {
+                        this.onHandleChangeComplete(color);
+                      }}
+                    />
+                  </Row>
+                  {/* <Row className="flex-grow-1"></Row> */}
+                  <Row className="align-self-end">
+                    <PreviewModal
+                      exportFunction={this.state.canvasController.exportToImage}
+                    />
+                    <ExportImageModal
+                      exportFunction={this.state.canvasController.exportToImage}
+                    />
+                    <ButtonGroup className="ml-2">
+                      <ExportProjectModal
+                        exportFunction={this.state.canvasController.exportToJSON}
                       />
-                    </InputGroup.Prepend>
-                    <FormControl
-                      placeholder={
-                        !this.state.editing ? "Add Text" : "Update Text"
-                      }
-                      aria-label="text"
-                      name="textInput"
-                      onChange={this.handleOnChange}
-                      value={this.state.textInput}
-                      type="text"
-                    />
-                    <InputGroup.Prepend>
-                      <Button
-                        className="h-"
-                        onClick={() => {
-                          const fillColor =
-                            this.state.foreground !== this.state.tshirtColor
-                              ? this.state.foreground
-                              : "#000000";
-                          if (!this.state.editing)
-                            canvasController.addText(
-                              this.state.textInput,
-                              this.state.textFont,
-                              fillColor                            );
-                          else
-                            canvasController.updateText(
-                              this.state.selectedObjects[0] as fabric.Textbox,
-                              this.state.textInput,
-                              this.state.textFont
-                              //fillColor
-                            );
-                          this.setState({ textInput: "", editing: false });
-                        }}
-                      >
-                        {!this.state.editing ? (
-                          <>
-                            <i className="fas fa-plus mr-1"></i>Add Text
-                          </>
-                        ) : (
-                          "Update Text"
-                        )}
-                      </Button>
-                    </InputGroup.Prepend>
-                  </InputGroup>
-                </Row>
-                <Row className="d-flex justify-content-center">
-                  <ColorSelector
-                    color={this.state.foreground}
-                    handleChangeComplete={(color: string) => {
-                      this.onHandleChangeComplete(color);
+                      <ImportProjectModal
+                        importFunction={
+                          this.state.canvasController.importFromJSON
+                        }
+                      />
+                    </ButtonGroup>
+                  <Button
+                    variant="danger"
+                    //disabled={this.state.selectedObjects.length === 0}
+                    onClick={() => {
+                      this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
+                      this.state.canvasController.removeObjectsOutsideBoundary();
                     }}
-                  />
-                </Row>
-                <Row className="flex-grow-1"></Row>
-                <Row className="align-self-end">
-                  <PreviewModal
-                    exportFunction={this.state.canvasController.exportToImage}
-                  />
-                  <ExportImageModal
-                    exportFunction={this.state.canvasController.exportToImage}
-                  />
-                  <ButtonGroup className="ml-2">
-                    <ExportProjectModal
-                      exportFunction={this.state.canvasController.exportToJSON}
-                    />
-                    <ImportProjectModal
-                      importFunction={
-                        this.state.canvasController.importFromJSON
+                  >
+                  {/* <i className="fas fa-trash mr-1"></i> */}
+                    Mask Objects
+                  </Button> 
+                  <Button
+                    variant="danger"
+                    //disabled={this.state.selectedObjects.length === 0}
+                    onClick={() => {
+                      this.state.canvasController.removeObjectsOutsideBoundary();
+                    }}
+                  >
+                  {/* <i className="fas fa-trash mr-1"></i> */}
+                    Remove OFB Objects
+                  </Button> 
+                  <Button
+                    variant="danger"
+                    //disabled={this.state.selectedObjects.length === 0}
+                    onClick={() => {
+                      this.state.canvasController.unclipObjects();
+                      this.state.canvasController.ungroupObjects();
+                    }}
+                  >
+                  {/* <i className="fas fa-trash mr-1"></i> */}
+                    Unclip mask
+                  </Button> 
+                  <Form>
+                    <Form.Check 
+                      type="checkbox" 
+                      id="myCheckbox" 
+                      label="Hide Editable Area"
+                      onChange={
+                        (e:React.ChangeEvent<HTMLInputElement>)=>{
+                          const checked = e.currentTarget.checked;
+                          this.state.canvasController.toggleEditableArea(checked)
+                          this.setState({isEditableAreaInvisible: checked})
+                        } 
                       }
-                    />
-                  </ButtonGroup>
-                <Button
-                  variant="danger"
-                  //disabled={this.state.selectedObjects.length === 0}
-                  onClick={() => {
-                    this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
-                    this.state.canvasController.removeObjectsOutsideBoundary();
-                  }}
-                >
-                {/* <i className="fas fa-trash mr-1"></i> */}
-                  Mask Objects
-                </Button> 
-                <Button
-                  variant="danger"
-                  //disabled={this.state.selectedObjects.length === 0}
-                  onClick={() => {
-                    this.state.canvasController.removeObjectsOutsideBoundary();
-                  }}
-                >
-                {/* <i className="fas fa-trash mr-1"></i> */}
-                  Remove OFB Objects
-                </Button> 
-                <Button
-                  variant="danger"
-                  //disabled={this.state.selectedObjects.length === 0}
-                  onClick={() => {
-                    this.state.canvasController.unclipObjects();
-                    this.state.canvasController.ungroupObjects();
-                  }}
-                >
-                {/* <i className="fas fa-trash mr-1"></i> */}
-                  Unclip mask
-                </Button> 
-                <Form>
-                  <Form.Check 
-                    type="checkbox" 
-                    id="myCheckbox" 
-                    label="Hide Editable Area"
-                    onChange={
-                      (e:React.ChangeEvent<HTMLInputElement>)=>{
-                        const checked = e.currentTarget.checked;
-                        this.state.canvasController.toggleEditableArea(checked)
-                        this.setState({isEditableAreaInvisible: checked})
-                      } 
-                    }
-                    />
-                </Form>
-                </Row>
-              </>
-            ) : null}
-          </Col>
-        </Row>
-      </div>
+                      />
+                  </Form>
+                  </Row>
+                </>
+              ) : null}
+            </Col>
+          </Row>
+        </div>
+      </>
     );
   }
 }

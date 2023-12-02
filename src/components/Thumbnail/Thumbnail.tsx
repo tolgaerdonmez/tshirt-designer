@@ -3,7 +3,7 @@ import { Image, Card } from "react-bootstrap";
 
 function Thumbnail(props: any) {
   return (
-    <Card style={{ width: "6rem" }} onClick={props.handleSelection}>
+    <Card style={{ width: "4rem" }} onClick={props.handleSelection}>
       <Image src={props.imageUrl} thumbnail />
     </Card>
   );
