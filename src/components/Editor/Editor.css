@@ -14,7 +14,20 @@
 .expanded {
 	box-shadow: none !important;
 } */
+.main-body { 
+	margin: 0px;
+}
 .dropdown-menu {
 	height: 200px;
 	overflow-y: scroll;
+}
+.side-menu-container {
+	position: absolute;
+	height: 100vh; 
+	width: 100px; 
+	background-color: #f8f9fa;
+	padding: 0px; 
+	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+	overflow-y: auto;
+	min-width: 100px;
 }

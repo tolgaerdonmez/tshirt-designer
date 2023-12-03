@@ -82,12 +82,17 @@ class Editor extends Component<Props, State> {
     this.setState({previewing: !this.state.previewing}, ()=>{
       if (this.state.previewing) {
         this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
+        // Trying to figure out why it creats copies of objects 
+        // and place the objects centered at (0,0)
         this.state.canvasController.removeObjectsOutsideBoundary();
       }
       else {
         this.state.canvasController.unclipObjects();
         this.state.canvasController.ungroupObjects();
       }
+      this.state.canvasController.toggleEditableArea(this.state.previewing)
+      this.setState({isEditableAreaInvisible: this.state.previewing})
+      this.state.canvasController.canvas.renderAll();
     });
   }
 
@@ -194,12 +199,12 @@ class Editor extends Component<Props, State> {
       <>
         {/* <div className="my-5 mx-5"> */}
         <div>
-          <Row>
-            <Col xs={3} style={{ position: 'fixed', height: '100vh', width: '120px', backgroundColor: '#f8f9fa', padding: '0px', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)', overflowY: 'auto' }}>
+          <Row className="main-body">
+            <Col xs={1} className="side-menu-container">
             {/* Sidebar content goes here */}
               <SideMenu canvas={this.state.canvasController.canvas} editor={this.state} setEditor={this.setEditorState} />
             </Col>
-            <Col xs={9} style={{ marginLeft: '125px', padding: '20px' }}>
+            <Col xs={7} style={{ marginLeft: '125px', padding: '20px' }}>
                 <Canvas
                   tShirtId="tshirt_0001"
                   tshirt="tshirt"
@@ -243,7 +248,7 @@ class Editor extends Component<Props, State> {
                   visible={this.state.editing} />
               </div>
             </Col>
-            <Col className="d-flex flex-column">
+            <Col xs={4} className="d-flex flex-column">
               <Row>
                 <h1>Editor</h1>
               </Row>
@@ -339,38 +344,6 @@ class Editor extends Component<Props, State> {
                         }
                       />
                     </ButtonGroup>
-                  <Button
-                    variant="danger"
-                    //disabled={this.state.selectedObjects.length === 0}
-                    onClick={() => {
-                      this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
-                      this.state.canvasController.removeObjectsOutsideBoundary();
-                    }}
-                  >
-                  {/* <i className="fas fa-trash mr-1"></i> */}
-                    Mask Objects
-                  </Button> 
-                  <Button
-                    variant="danger"
-                    //disabled={this.state.selectedObjects.length === 0}
-                    onClick={() => {
-                      this.state.canvasController.removeObjectsOutsideBoundary();
-                    }}
-                  >
-                  {/* <i className="fas fa-trash mr-1"></i> */}
-                    Remove OFB Objects
-                  </Button> 
-                  <Button
-                    variant="danger"
-                    //disabled={this.state.selectedObjects.length === 0}
-                    onClick={() => {
-                      this.state.canvasController.unclipObjects();
-                      this.state.canvasController.ungroupObjects();
-                    }}
-                  >
-                  {/* <i className="fas fa-trash mr-1"></i> */}
-                    Unclip mask
-                  </Button> 
                   <Form>
                     <Form.Check 
                       type="checkbox" 
