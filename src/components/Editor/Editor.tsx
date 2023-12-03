@@ -79,7 +79,6 @@ class Editor extends Component<Props, State> {
   }
 
   preview = () => { 
-    console.log("preview");
     this.setState({previewing: !this.state.previewing}, ()=>{
       if (this.state.previewing) {
         this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
