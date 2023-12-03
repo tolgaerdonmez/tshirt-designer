@@ -9,7 +9,7 @@ export interface CanvasController {
   setBackground: (tShirtId: string) => void;
   setTShirt: (tShirtId: string) => void;
   addImage: () => void;
-  addText: (text: string, fontFamily: string, textColor: string) => void;
+  addText: (text: string, fontFamily: string, textColor: string, setActiveText?: boolean) => void;
   updateText: (
     textObj: fabric.Textbox,
     text: string,
@@ -291,7 +291,7 @@ export default class Canvas extends Component<Props, State> {
     });
   };
 
-  addText = (text: string, fontFamily: string, textColor: string) => {
+  addText = (text: string, fontFamily: string, textColor: string, setActiveText: boolean = false) => {
     const [w, h]: number[] = [this.canvas.getWidth(), this.canvas.getHeight()];
     let t = new fabric.Textbox(text, {
       left: w / 4,
@@ -303,6 +303,8 @@ export default class Canvas extends Component<Props, State> {
     });
     //t.set({fontFamily: fontFamily});
     this.canvas.add(t);
+    if (setActiveText)
+      this.canvas.setActiveObject(t);
     this.canvas.renderAll();
   };
 

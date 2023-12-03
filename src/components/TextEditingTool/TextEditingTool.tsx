@@ -8,7 +8,7 @@ import {
 import { CanvasController } from "../Canvas/Canvas";
 import FontPicker from "../CustomFontPicker";
 import { google_access_key } from "../../config.json";
-
+import {Color} from "../../config/constants";
 import "./TextEditingTool.css";
 
 interface State {
@@ -29,42 +29,42 @@ interface State {
 
 interface Props {
   // You can define props here if needed
-  editorState:State;
-  setEditorState:(properties:object, callback?:()=>void)=>void;
+  editor:State;
+  setEditor:(properties:object, callback?:()=>void)=>void;
   loadFont:()=>void;
+  visible?:boolean;
 }
 
-const TextEditingTool: React.FC<Props> = ({editorState, setEditorState, loadFont}) => {
-  // State example using the useState hook
-
+const TextEditingTool: React.FC<Props> = ({editor, setEditor, loadFont, visible=false}) => {
+    // State example using the useState hook
     const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setEditorState({[e.target.name]: e.target.value });
-        if (editorState.editing) {
-        editorState.canvasController.updateText(
-            editorState.selectedObjects[0] as fabric.Textbox,
-            editorState.textInput,
-            editorState.textFont,
-        );
+        setEditor({[e.target.name]: e.target.value });
+        if (editor.editing) {
+            editor.canvasController.updateText(
+                editor.selectedObjects[0] as fabric.Textbox,
+                editor.textInput,
+                editor.textFont,
+            );
         }
     };
 
 
   return (
     <>
-     <InputGroup className="my-3">
+     {visible && (<InputGroup className="my-3">
         <InputGroup.Prepend>
             <FontPicker
             apiKey={google_access_key}
-            activeFontFamily={editorState.textFont}
+            activeFontFamily={editor.textFont}
             onChange={(nextFont) => {
-                setEditorState({
+                setEditor({
                 textFont: nextFont.family,
                 }, ()=>{
-                    if (editorState.editing) {
-                        editorState.canvasController.updateText(
-                            editorState.selectedObjects[0] as fabric.Textbox,
-                            editorState.textInput,
-                            editorState.textFont
+                    if (editor.editing) {
+                        editor.canvasController.updateText(
+                            editor.selectedObjects[0] as fabric.Textbox,
+                            editor.textInput,
+                            editor.textFont
                         );
                         loadFont();
                     }
@@ -79,12 +79,12 @@ const TextEditingTool: React.FC<Props> = ({editorState, setEditorState, loadFont
         <Form.Group className="mb-1">
             <FormControl
                 placeholder={
-                !editorState.editing ? "Add Text" : "Update Text"
+                    !editor.editing ? "Add Text" : "Update Text"
                 }
                 aria-label="text"
                 name="textInput"
                 onChange={handleOnChange}
-                value={editorState.textInput}
+                value={editor.textInput}
                 type="text"
                 className="textInput"
             />
@@ -94,25 +94,24 @@ const TextEditingTool: React.FC<Props> = ({editorState, setEditorState, loadFont
             className="h-"
             onClick={() => {
                 const fillColor =
-                editorState.foreground !== editorState.tshirtColor
-                    ? editorState.foreground
-                    : "#000000";
-                if (!editorState.editing)
-                editorState.canvasController.addText(
-                    editorState.textInput,
-                    editorState.textFont,
-                    fillColor                            );
+                (editor.foreground !== editor.tshirtColor)
+                    ? editor.foreground
+                    : Color.black;
+                if (!editor.editing)
+                editor.canvasController.addText(
+                    editor.textInput,
+                    editor.textFont,
+                    fillColor);
                 else
-                editorState.canvasController.updateText(
-                    editorState.selectedObjects[0] as fabric.Textbox,
-                    editorState.textInput,
-                    editorState.textFont
-                    //fillColor
+                editor.canvasController.updateText(
+                    editor.selectedObjects[0] as fabric.Textbox,
+                    editor.textInput,
+                    editor.textFont
                 );
-                setEditorState({ textInput: "", editing: false });
+                setEditor({ textInput: "", editing: false });
             }}
             >
-            {!editorState.editing ? (
+            {!editor.editing ? (
                 <>
                 <i className="fas fa-plus mr-1"></i>Add Text
                 </>
@@ -121,7 +120,7 @@ const TextEditingTool: React.FC<Props> = ({editorState, setEditorState, loadFont
             )}
             </Button>
         </InputGroup.Prepend>
-        </InputGroup>
+        </InputGroup>)}
     </>
   );
 };

@@ -8,7 +8,6 @@ import {
 } from "react-bootstrap";
 
 import Canvas, { CanvasController, CanvasOrderDirection } from "../Canvas/Canvas";
-import ImageUploadModal from "../Modals/Image/ImageUploadModal";
 import ExportImageModal from "../Modals/Image/ExportImageModal";
 import ImportProjectModal from "../Modals/Project/ImportProjectModal";
 import ExportProjectModal from "../Modals/Project/ExportProjectModal";
@@ -17,7 +16,7 @@ import "./Editor.css";
 import { fabric } from "fabric";
 import ColorSelector from "../ColorSelector/SketchPicker";
 import Thumbnail from "../Thumbnail/Thumbnail";
-import PreviewModal from "../Modals/Image/PreviewModel";
+// import PreviewModal from "../Modals/Image/PreviewModel";
 import TextEditingTool from "../TextEditingTool/TextEditingTool";
 import SideMenu from "../SideMenu/SideMenu";
 import TextLoader from "../TextLoader/TextLoader";
@@ -44,6 +43,7 @@ interface State {
   tshirtId: string;
   tshirtColor: string;
   isEditableAreaInvisible: boolean;
+  previewing: boolean
   [key: string]: any;
 }
 
@@ -67,13 +67,28 @@ class Editor extends Component<Props, State> {
     textureImgPath: "",
     tshirtId: DEFAULT_TSHIRT_ID,
     tshirtColor: DEFAULT_TSHIRT_COLOR,
-    isEditableAreaInvisible: false
+    isEditableAreaInvisible: false,
+    previewing: false
   };
 
   syncText = (textbox:any)=> { 
     const self = this as Editor;
     textbox.on ('change', function () {
       self.setState({textInput: textbox.text})
+    });
+  }
+
+  preview = () => { 
+    console.log("preview");
+    this.setState({previewing: !this.state.previewing}, ()=>{
+      if (this.state.previewing) {
+        this.state.canvasController.maskEditableArea(this.state.tshirtId, this.state.selectedObjects);
+        this.state.canvasController.removeObjectsOutsideBoundary();
+      }
+      else {
+        this.state.canvasController.unclipObjects();
+        this.state.canvasController.ungroupObjects();
+      }
     });
   }
 
@@ -183,7 +198,7 @@ class Editor extends Component<Props, State> {
           <Row>
             <Col xs={3} style={{ position: 'fixed', height: '100vh', width: '120px', backgroundColor: '#f8f9fa', padding: '0px', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)', overflowY: 'auto' }}>
             {/* Sidebar content goes here */}
-              <SideMenu canvas={this.state.canvasController.canvas} />
+              <SideMenu canvas={this.state.canvasController.canvas} editor={this.state} setEditor={this.setEditorState} />
             </Col>
             <Col xs={9} style={{ marginLeft: '125px', padding: '20px' }}>
                 <Canvas
@@ -222,7 +237,11 @@ class Editor extends Component<Props, State> {
                 </ButtonGroup>
               </div>
               <div className="mt-3">  
-                <TextEditingTool setEditorState={this.setEditorState} editorState={this.state} loadFont={this.loadFont}/>
+                <TextEditingTool 
+                  setEditor={this.setEditorState} 
+                  editor={this.state} 
+                  loadFont={this.loadFont} 
+                  visible={this.state.editing} />
               </div>
             </Col>
             <Col className="d-flex flex-column">
@@ -232,11 +251,6 @@ class Editor extends Component<Props, State> {
               {/* Editor Panel */}
               {this.state.editorReady ? (
                 <>
-                  <Row>
-                    <ImageUploadModal
-                      canvas={this.state.canvasController.canvas}
-                    />
-                  </Row>
                   <Row>
                     <Thumbnail
                       imageUrl="images/tshirt.svg"
@@ -255,7 +269,6 @@ class Editor extends Component<Props, State> {
                       }}
                     />
                   </Row>
-
                   <Row>
                     <Thumbnail
                       imageUrl="images/textures/01.jpg"
@@ -312,11 +325,8 @@ class Editor extends Component<Props, State> {
                       }}
                     />
                   </Row>
-                  {/* <Row className="flex-grow-1"></Row> */}
                   <Row className="align-self-end">
-                    <PreviewModal
-                      exportFunction={this.state.canvasController.exportToImage}
-                    />
+                    <button onClick={this.preview}>Preview</button>
                     <ExportImageModal
                       exportFunction={this.state.canvasController.exportToImage}
                     />
