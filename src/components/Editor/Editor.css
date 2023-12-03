@@ -21,8 +21,11 @@
 	height: 200px;
 	overflow-y: scroll;
 }
+.main-body { 
+	display: flex;
+}
 .side-menu-container {
-	position: absolute;
+	position:inherit;
 	height: 100vh; 
 	width: 100px; 
 	background-color: #f8f9fa;
@@ -31,3 +34,8 @@
 	overflow-y: auto;
 	min-width: 100px;
 }
+.properties-menu-container { 
+	flex: 1;
+}
+/* .editor-container { 
+} */

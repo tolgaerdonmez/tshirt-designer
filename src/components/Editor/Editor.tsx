@@ -204,51 +204,7 @@ class Editor extends Component<Props, State> {
             {/* Sidebar content goes here */}
               <SideMenu canvas={this.state.canvasController.canvas} editor={this.state} setEditor={this.setEditorState} />
             </Col>
-            <Col xs={7} style={{ marginLeft: '125px', padding: '20px' }}>
-                <Canvas
-                  tShirtId="tshirt_0001"
-                  tshirt="tshirt"
-                  controller={(controller) => this.initCanvasController(controller)} />
-                <TextLoader className="spinner-off"/>
-                <div className="mt-3">           
-                <Button
-                  variant="danger"
-                  disabled={this.state.selectedObjects.length === 0}
-                  onClick={() => {
-                    canvasController.deleteObjects(this.state.selectedObjects);
-                    this.setState({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
-                  }}
-                >
-                  <i className="fas fa-trash msr-1"></i>
-                  Delete Selected
-                </Button>
-                <ButtonGroup aria-label="change object order" className="ml-2">
-                  {Object.keys(CanvasOrderDirection).map((direction) => (
-                    <Button
-                      key={direction}
-                      variant="warning"
-                      disabled={this.state.selectedObjects.length === 0}
-                      onClick={() =>
-                        this.state.canvasController.changeObjectOrder(
-                          this.state.selectedObjects,
-                          direction
-                        )
-                      }
-                    >
-                      {direction}
-                    </Button>
-                  ))}
-                </ButtonGroup>
-              </div>
-              <div className="mt-3">  
-                <TextEditingTool 
-                  setEditor={this.setEditorState} 
-                  editor={this.state} 
-                  loadFont={this.loadFont} 
-                  visible={this.state.editing} />
-              </div>
-            </Col>
-            <Col xs={4} className="d-flex flex-column">
+            <Col xs={4} className="properties-menu-container d-flex flex-column">
               <Row>
                 <h1>Editor</h1>
               </Row>
@@ -361,6 +317,50 @@ class Editor extends Component<Props, State> {
                   </Row>
                 </>
               ) : null}
+            </Col>            
+            <Col xs={6} className="editor-container">
+                <Canvas
+                  tShirtId="tshirt_0001"
+                  tshirt="tshirt"
+                  controller={(controller) => this.initCanvasController(controller)} />
+                <TextLoader className="spinner-off"/>
+                <div className="mt-3">           
+                <Button
+                  variant="danger"
+                  disabled={this.state.selectedObjects.length === 0}
+                  onClick={() => {
+                    canvasController.deleteObjects(this.state.selectedObjects);
+                    this.setState({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
+                  }}
+                >
+                  <i className="fas fa-trash msr-1"></i>
+                  Delete Selected
+                </Button>
+                <ButtonGroup aria-label="change object order" className="ml-2">
+                  {Object.keys(CanvasOrderDirection).map((direction) => (
+                    <Button
+                      key={direction}
+                      variant="warning"
+                      disabled={this.state.selectedObjects.length === 0}
+                      onClick={() =>
+                        this.state.canvasController.changeObjectOrder(
+                          this.state.selectedObjects,
+                          direction
+                        )
+                      }
+                    >
+                      {direction}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </div>
+              <div className="mt-3">  
+                <TextEditingTool 
+                  setEditor={this.setEditorState} 
+                  editor={this.state} 
+                  loadFont={this.loadFont} 
+                  visible={this.state.editing} />
+              </div>
             </Col>
           </Row>
         </div>
