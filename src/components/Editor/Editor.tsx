@@ -1,4 +1,4 @@
-import React, { Component, ChangeEvent } from "react";
+import React, { Component } from "react";
 import {
   Col,
   Row,
@@ -15,11 +15,12 @@ import "./Editor.css";
 
 import { fabric } from "fabric";
 import ColorSelector from "../ColorSelector/SketchPicker";
-import Thumbnail from "../Thumbnail/Thumbnail";
 // import PreviewModal from "../Modals/Image/PreviewModel";
 import TextEditingTool from "../TextEditingTool/TextEditingTool";
 import SideMenu from "../SideMenu/SideMenu";
 import TextLoader from "../TextLoader/TextLoader";
+import TextureButtonsGroup from "../TextureButtonsGroup/TextureButtonsGroup";
+import TShirtSelectionGroup from "../TShirtSelectionGroup/TShirtSelectionGroup";
 
 import {
   DEFAULT_FG,
@@ -28,6 +29,7 @@ import {
   DEFAULT_TSHIRT_ID,
   Color
 } from "../../config/constants";
+
 
 interface Props {}
 interface State {
@@ -205,79 +207,16 @@ class Editor extends Component<Props, State> {
               <SideMenu canvas={this.state.canvasController.canvas} editor={this.state} setEditor={this.setEditorState} />
             </Col>
             <Col xs={4} className="properties-menu-container d-flex flex-column">
-              <Row>
-                <h1>Editor</h1>
-              </Row>
               {/* Editor Panel */}
               {this.state.editorReady ? (
                 <>
                   <Row>
-                    <Thumbnail
-                      imageUrl="images/tshirt.svg"
-                      handleSelection={() => {
-                        this.setState({ tshirtId: "tshirt_0001" }, () => {
-                          canvasController.setTShirt(this.state.tshirtId);
-                        });
-                      }}
-                    />
-                    <Thumbnail
-                      imageUrl="images/tshirt2.svg"
-                      handleSelection={() => {
-                        this.setState({ tshirtId: "tshirt_0002" }, () => {
-                          canvasController.setTShirt(this.state.tshirtId);
-                        });
-                      }}
-                    />
+                      <TShirtSelectionGroup editor={this.state} setEditor={this.setEditorState} />
                   </Row>
                   <Row>
-                    <Thumbnail
-                      imageUrl="images/textures/01.jpg"
-                      handleSelection={(e: any) => {
-                        // map texture
-                        canvasController.updateTexture(
-                          e.target.getAttribute("src"),
-                          this.state.tshirtId
-                        );
-                      }}
-                    />
-                    <Thumbnail
-                      imageUrl="images/textures/02.jpg"
-                      handleSelection={(e: any) => {
-                        canvasController.updateTexture(
-                          e.target.getAttribute("src"),
-                          this.state.tshirtId
-                        );
-                      }}
-                    />
-                    <Thumbnail
-                      imageUrl="images/textures/03.jpg"
-                      handleSelection={(e: any) => {
-                        canvasController.updateTexture(
-                          e.target.getAttribute("src"),
-                          this.state.tshirtId
-                        );
-                      }}
-                    />
-                    <Thumbnail
-                      imageUrl="images/textures/04.jpg"
-                      handleSelection={(e: any) => {
-                        canvasController.updateTexture(
-                          e.target.getAttribute("src"),
-                          this.state.tshirtId
-                        );
-                      }}
-                    />
-                    <Thumbnail
-                      imageUrl="images/textures/05.jpg"
-                      handleSelection={(e: any) => {
-                        canvasController.updateTexture(
-                          e.target.getAttribute("src"),
-                          this.state.tshirtId
-                        );
-                      }}
-                    />
+                      <TextureButtonsGroup editor={this.state} />
                   </Row>
-                  <Row className="d-flex justify-content-center">
+                  <Row className="d-flex">
                     <ColorSelector
                       color={this.state.foreground}
                       handleChangeComplete={(color: string) => {
