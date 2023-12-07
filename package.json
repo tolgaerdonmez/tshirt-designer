@@ -1,10 +1,16 @@
 {
 	"name": "tshirt-designer",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
-	"author": {
-		"name": "Tolga Erdonmez",
-		"email": "tolgaerdonmez@gmail.com"
+	"authors": {
+		"author1": {
+			"name": "Tolga Erdonmez",
+			"email": "tolgaerdonmez@gmail.com"
+		},
+		"author2": {
+			"name": "Steve Hon",
+			"email": "stevekyhon@gmail.com"			
+		}
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.5.1",

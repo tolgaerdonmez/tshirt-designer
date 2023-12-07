@@ -1,33 +1,16 @@
 import React from 'react'
 import Thumbnail from '../Thumbnail/Thumbnail';
-import { CanvasController} from "../Canvas/Canvas";
-interface State {
-  canvasController: CanvasController;
-  editorReady: boolean;
-  textInput: string;
-  textFont: string;
-  editing: boolean;
-  currentColor: string;
-  selectedObjects: fabric.Object[];  // need this
-  foreground: string;
-  textureImgPath: string;
-  tshirtId: string;
-  tshirtColor: string;
-  isEditableAreaInvisible: boolean;
-  [key: string]: any;
-}
-
+import State from "../../interfaces/State";
 interface Props {
     editor:State;
-    
 }
 
 const TextureButtonsGroup:React.FC<Props> = ({editor}) => {
     const selectionEventHandler = (e: any) => {
             // map texture
-            editor.canvasController.updateTexture(
+            editor.canvasController!.updateTexture(
                 e.target.getAttribute("src"),
-                editor.tshirtId
+                editor.tshirtId!
             );
         }
 

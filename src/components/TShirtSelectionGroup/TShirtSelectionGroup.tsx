@@ -1,21 +1,7 @@
 import React from 'react'
 import Thumbnail from '../Thumbnail/Thumbnail';
-import { CanvasController} from "../Canvas/Canvas";
-interface State {
-  canvasController: CanvasController;
-  editorReady: boolean;
-  textInput: string;
-  textFont: string;
-  editing: boolean;
-  currentColor: string;
-  selectedObjects: fabric.Object[];  // need this
-  foreground: string;
-  textureImgPath: string;
-  tshirtId: string;
-  tshirtColor: string;
-  isEditableAreaInvisible: boolean;
-  [key: string]: any;
-}
+import State from "../../interfaces/State";
+
 
 interface Props {
     editor:State;
@@ -26,7 +12,7 @@ interface Props {
 const TShirtSelectionGroup:React.FC<Props> = ({editor, setEditor}) => {
     const selectionEventHandler = (tshirtId:string) => {
             setEditor({ tshirtId }, () => {
-                editor.canvasController.setTShirt(editor.tshirtId);
+                editor.canvasController!.setTShirt(editor.tshirtId!);
             });
         }
 
