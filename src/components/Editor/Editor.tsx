@@ -2,12 +2,10 @@ import React, { Component } from "react";
 import {
   Col,
   Row,
-  Button,
-  ButtonGroup,
   Form
 } from "react-bootstrap";
 
-import Canvas, { CanvasController, CanvasOrderDirection } from "../Canvas/Canvas";
+import Canvas, { CanvasController } from "../Canvas/Canvas";
 import "./Editor.css";
 
 import { fabric } from "fabric";
@@ -26,6 +24,7 @@ import {
 } from "../../config/constants";
 
 import State from "../../interfaces/State";
+import ObjectControlButtonsGroup from "../ObjectControlButtonsGroup/ObjectControlButtonsGroup";
 
 // interface Props {
 //   editor:Object;
@@ -52,31 +51,13 @@ class Editor extends Component<Props, State> {
     });
   }
 
-  preview = () => { 
-    this.props.setEditor({previewing: !this.props.editor.previewing}, ()=>{
-      if (this.props.editor.previewing) {
-        this.props.editor.canvasController.maskEditableArea(this.props.editor.tshirtId!, this.props.editor.selectedObjects!);
-        // Trying to figure out why it creats copies of objects 
-        // and place the objects centered at (0,0)
-        this.props.editor.canvasController.removeObjectsOutsideBoundary();
-      }
-      else {
-        this.props.editor.canvasController.unclipObjects();
-        this.props.editor.canvasController.ungroupObjects();
-      }
-      this.props.editor.canvasController.toggleEditableArea(this.props.editor.previewing!)
-      this.props.setEditor({isEditableAreaInvisible: this.props.editor.previewing})
-      this.props.editor.canvasController.canvas.renderAll();
-    });
-  }
-
   setEditorState = (stateProperties:object, callback?:()=>void) => {
     this.props.setEditor({...stateProperties}, callback);
   };
 
   // SH 6/5/2023
   // raising ColorSelector Event
-  onHandleChangeComplete = (color: any) => {
+  handleColorSelection = (color: any) => {
     this.props.setEditor(
       {
         foreground: color.hex,
@@ -89,21 +70,21 @@ class Editor extends Component<Props, State> {
         const allNotActive = Array.from(inputElements).every(
           (element) => !element.disabled
         );
-        // only tshirt is selected in the canvas
-        if (this.props.editor.selectedObjects!.length === 0 && allNotActive) {
-          this.props.editor.canvasController!.updateTShirtColor(
-            this.props.editor.foreground!,
-            this.props.editor.tshirtId!,
+        // only tshirt is selected on the canvas
+        if (this.props.editor.selectedObjects.length === 0 && allNotActive) {
+          this.props.editor.canvasController.updateTShirtColor(
+            this.props.editor.foreground,
+            this.props.editor.tshirtId,
           );
           this.props.setEditor({ tshirtColor: this.props.editor.foreground});
         } else if (this.props.editor.editing) {  // text is selected
-              this.props.editor.canvasController!.updateTextColor (
-                this.props.editor.selectedObjects![0] as fabric.Textbox,
-                this.props.editor.foreground!
+              this.props.editor.canvasController.updateTextColor (
+                this.props.editor.selectedObjects[0] as fabric.Textbox,
+                this.props.editor.foreground
               );
         }
-      }
-    );
+        this.props.setEditor({isCanvasDeselected:false});
+      });
   };
 
   // dom textbox onchange event
@@ -212,7 +193,6 @@ class Editor extends Component<Props, State> {
   };
 
   render() {
-    const { canvasController } = this.props.editor;
     return (
       <>
         {/* <div className="my-5 mx-5"> */}
@@ -220,12 +200,24 @@ class Editor extends Component<Props, State> {
           <Row className="main-body">
             <Col xs={1} className="side-menu-container">
             {/* Sidebar content goes here */}
-              <SideMenu canvas={this.props.editor.canvasController!.canvas} editor={this.props.editor} setEditor={this.setEditorState} />
+              <SideMenu canvas={this.props.editor.canvasController.canvas} editor={this.props.editor} setEditor={this.setEditorState} />
             </Col>
             <Col xs={4} className="properties-menu-container d-flex flex-column">
               {/* Editor Panel */}
               {this.props.editor.editorReady ? (
                 <>
+                  <Row>
+                    <div className="mt-3">     
+                      <ObjectControlButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />      
+                    </div>
+                    <div className="mt-3">  
+                      {!this.props.editor.editing || (<TextEditingTool 
+                        setEditor={this.setEditorState} 
+                        editor={this.props.editor} 
+                        loadFont={this.loadFont} 
+                        />)}
+                    </div>
+                  </Row>
                   <Row>
                       <TShirtSelectionGroup editor={this.props.editor} setEditor={this.setEditorState} />
                   </Row>
@@ -233,9 +225,9 @@ class Editor extends Component<Props, State> {
                       {
                       // (true) ||
                       (this.props.editor.fillSelected && 
-                       this.props.editor.selectedObjects!.length === 0 && 
+                       this.props.editor.selectedObjects.length === 0 && 
                        !this.props.editor.isCanvasDeselected) && 
-                        (<TextureButtonsGroup editor={this.props.editor} />)
+                        (<TextureButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />)
                       }
                   </Row>
                   <Row className="d-flex">
@@ -246,30 +238,20 @@ class Editor extends Component<Props, State> {
                   (<ColorSelector
                     color={this.props.editor.foreground}
                     handleChangeComplete={(color: string) => {
-                      this.onHandleChangeComplete(color);
+                      this.handleColorSelection(color);
                     }}
                   />)}
                   </Row>
-                  <Row className="align-self-end">
-                    <Button variant="light" onClick={this.preview}>Preview</Button>
-                    {/* <ExportImageModal
-                      exportFunction={this.props.editor.canvasController.exportToImage}
-                    />
-                    <ButtonGroup className="ml-2">
-                      <ExportProjectModal
-                        exportFunction={this.props.editor.canvasController.exportToJSON}
-                      />
-                      <ImportProjectModal
-                        importFunction={
-                          this.props.editor.canvasController.importFromJSON
-                        }
-                      />
-                    </ButtonGroup> */}
+                </>
+              ) : null}
+            </Col>            
+            <Col xs={6} className="editor-container">
+                  <Row>
                   <Form>
                     <Form.Check 
                       type="checkbox" 
                       id="myCheckbox" 
-                      label="Hide Editable Area"
+                      label="Hide Printable Area"
                       onChange={
                         (e:React.ChangeEvent<HTMLInputElement>)=>{
                           const checked = e.currentTarget.checked;
@@ -279,53 +261,12 @@ class Editor extends Component<Props, State> {
                       }
                       />
                   </Form>
-                  </Row>
-                </>
-              ) : null}
-            </Col>            
-            <Col xs={6} className="editor-container">
+                  </Row>              
                 <Canvas
                   tShirtId={DEFAULT_TSHIRT_ID}
                   tshirt="tshirt"
                   controller={(controller) => this.initCanvasController(controller)} />
                 <TextLoader className="spinner-off"/>
-                <div className="mt-3">           
-                <Button
-                  variant="danger"
-                  disabled={this.props.editor.selectedObjects!.length === 0}
-                  onClick={() => {
-                    canvasController!.deleteObjects(this.props.editor.selectedObjects!);
-                    this.props.setEditor({ selectedObjects: [] as fabric.Object[], textInput: "", editing: false });
-                  }}
-                >
-                  <i className="fas fa-trash msr-1"></i>
-                  Delete Selected
-                </Button>
-                <ButtonGroup aria-label="change object order" className="ml-2">
-                  {Object.keys(CanvasOrderDirection).map((direction) => (
-                    <Button
-                      key={direction}
-                      variant="warning"
-                      disabled={this.props.editor.selectedObjects!.length === 0}
-                      onClick={() =>
-                        this.props.editor.canvasController!.changeObjectOrder(
-                          this.props.editor.selectedObjects!,
-                          direction
-                        )
-                      }
-                    >
-                      {direction}
-                    </Button>
-                  ))}
-                </ButtonGroup>
-              </div>
-              <div className="mt-3">  
-                {!this.props.editor.editing || (<TextEditingTool 
-                  setEditor={this.setEditorState} 
-                  editor={this.props.editor} 
-                  loadFont={this.loadFont} 
-                  />)}
-              </div>
             </Col>
           </Row>
         </div>

@@ -76,7 +76,7 @@ class App extends Component<{}, State> {
 		tshirtColor: DEFAULT_TSHIRT_COLOR,
 		isEditableAreaInvisible: false,
 		previewing: false,
-		fillSelected: false,
+		fillSelected: true,
 		isCanvasDeselected: true
 	};
   }
@@ -88,7 +88,7 @@ class App extends Component<{}, State> {
   render() {
     return (
 		<>
-			<Navbar editor={this.state} />
+			<Navbar editor={this.state} setEditor={this.handleEditorState} />
 			<Editor editor={this.state} setEditor={this.handleEditorState}/> 
 		</>
     );

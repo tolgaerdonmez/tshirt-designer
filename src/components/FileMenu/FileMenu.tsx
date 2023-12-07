@@ -1,37 +1,39 @@
 import React, {useState} from 'react';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
-import ExportAsImageModal from '../SideMenu/Modals/ExportAsImageModal';
+import ExportAsImageModal from './Modals/ExportAsImageModal';
+import ExportProjectModal from './Modals/ExportProjectModal';
+import ImportProjectModal from './Modals/ImportProjectModal';
+
 import State from '../../interfaces/State';
-// import ExportImageModal from "../Modals/Image/ExportImageModal";
-// import ImportProjectModal from "../Modals/Project/ImportProjectModal";
-// import ExportProjectModal from "../Modals/Project/ExportProjectModal";
 
 interface Props {
     style?: Object;
     editor: State;
+    setEditor:(properties:object, callback?:()=>void)=>void;
 }
 
-const FileMenu:React.FC<Props> = ({editor, style={}}) => {
+const FileMenu:React.FC<Props> = ({editor, setEditor, style={}}) => {
     const [showExportAsImage, setShowExportAsImage] = useState(false);
+    const [showExportProject, setShowExportProject] = useState(false);
+    const [showImportProject, setShowImportProject] = useState(false);
+    const handlePreview = ()=>{
+        setEditor({previewing: !editor.previewing}, ()=>{
+        if (editor.previewing) {
+            editor.canvasController.maskEditableArea(editor.tshirtId!, editor.selectedObjects!);
+            // Trying to figure out why it creats copies of objects 
+            // and place the objects centered at (0,0)
+            editor.canvasController.removeObjectsOutsideBoundary();
+        }
+        else {
+            editor.canvasController.unclipObjects();
+            editor.canvasController.ungroupObjects();
+        }
+        editor.canvasController.toggleEditableArea(editor.previewing!)
+        setEditor({isEditableAreaInvisible: editor.previewing})
+        editor.canvasController.canvas.renderAll();
+        });
+    };
   return (
-    // <ExportImageModal
-    //     exportFunction={this.state.canvasController.exportToImage}
-    //   />
-    //   <ButtonGroup className="ml-2">
-    //     <ExportProjectModal
-    //       exportFunction={this.state.canvasController.exportToJSON}
-    //     />
-    //     <ImportProjectModal
-    //       importFunction={
-    //         this.state.canvasController.importFromJSON
-    //       }
-    //     />
-    //   </ButtonGroup>
-
-    //   <Button variant="primary" onClick={handleShow}>
-    //     <i className="fas fa-image mr-1"></i>
-    //     Download Design
-    //   </Button>
     <>
         <DropdownButton variant="secondary" title="File" id="bg-nested-dropdown" style={style}>
             <Dropdown.Item 
@@ -41,13 +43,43 @@ const FileMenu:React.FC<Props> = ({editor, style={}}) => {
                     }}>
                     Export As Image
             </Dropdown.Item>
-            <Dropdown.Item eventKey="2">Export Project</Dropdown.Item>
-            <Dropdown.Item eventKey="3">Import Project</Dropdown.Item>
+            <Dropdown.Item 
+                eventKey="2" 
+                onSelect={(eventKey:string, event:any) => {
+                        setShowExportProject(true)
+                    }}>Export Project
+            </Dropdown.Item>
+            <Dropdown.Item 
+                eventKey="3" 
+                onSelect={(eventKey:string, event:any) => {
+                        setShowImportProject(true)
+                    }}>Import Project
+            </Dropdown.Item>
+            <Dropdown.Item 
+                eventKey="4" 
+                onSelect={handlePreview}>Preview
+            </Dropdown.Item>
         </DropdownButton>
         <ExportAsImageModal 
             show={showExportAsImage} 
-            setShow={()=>{setShowExportAsImage(true)}} 
-            exportFunction={editor.canvasController!.exportToImage} 
+            setShow={(visible:boolean) => { 
+                setShowExportAsImage(visible);
+            }}
+            exportFunction={editor.canvasController.exportToImage} 
+        />
+        <ExportProjectModal 
+            show={showExportProject} 
+            setShow={(visible:boolean) => { 
+                setShowExportProject(visible);
+            }}
+            exportFunction={editor.canvasController.exportToJSON} 
+        />
+        <ImportProjectModal 
+            show={showImportProject} 
+            setShow={(visible:boolean) => { 
+                setShowImportProject(visible);
+            }}
+            importFunction={editor.canvasController.importFromJSON} 
         />
     </>
   );

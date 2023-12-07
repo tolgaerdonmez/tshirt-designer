@@ -3,15 +3,17 @@ import Thumbnail from '../Thumbnail/Thumbnail';
 import State from "../../interfaces/State";
 interface Props {
     editor:State;
+    setEditor: (editorState: Record<string, any>, callback?: () => void) => void;
 }
 
-const TextureButtonsGroup:React.FC<Props> = ({editor}) => {
+const TextureButtonsGroup:React.FC<Props> = ({editor, setEditor}) => {
     const selectionEventHandler = (e: any) => {
             // map texture
-            editor.canvasController!.updateTexture(
+            editor.canvasController.updateTexture(
                 e.target.getAttribute("src"),
                 editor.tshirtId!
             );
+            setEditor({isCanvasDeselected:false});
         }
 
   return (

@@ -216,7 +216,7 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
                   {editor.fillSelected &&
                     editor.selectedObjects!.length === 0 &&
                     !editor.isCanvasDeselected && (
-                      <TextureButtonsGroup editor={editor} />
+                      <TextureButtonsGroup editor={editor} setEditor={setEditor} />
                     )}
                 </Row>
                 <Row className="d-flex">
