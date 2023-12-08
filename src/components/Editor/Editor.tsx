@@ -8,7 +8,6 @@ import {
 import Canvas from "../Canvas/Canvas";
 import "./Editor.css";
 
-import { fabric } from "fabric";
 import ColorSelector from "../ColorSelector/SketchPicker";
 // import PreviewModal from "../Modals/Image/PreviewModel";
 import TextEditingTool from "../TextEditingTool/TextEditingTool";
@@ -62,8 +61,7 @@ class Editor extends Component<Props, State> {
       {
         foreground: color.hex,
         currentColor: hexToRGBA(color.hex, 255),
-      },
-      () => {
+      }, () => {
         // Get all elements in the HTML document
         const inputElements = document.querySelectorAll("input");
         // Check if all elements are not selected
@@ -86,28 +84,6 @@ class Editor extends Component<Props, State> {
         this.props.setEditor({isCanvasDeselected:false});
       });
   };
-
-  // dom textbox onchange event
-    loadFont = () => {
-      const textLoaderClass:string = "spinner-border text-primary spinner-";
-      const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}off`)[0];
-      console.log ('textLoader: ', textLoader);
-      if (textLoader) {
-          textLoader.className = `${textLoaderClass}on`;
-          const parentNode:Element = document.getElementsByClassName ("canvas-container")[0];
-          const spinnerContainer:Element = document.getElementsByClassName ("spinner-container")[0];
-          parentNode.appendChild(spinnerContainer);
-      }
-    // This is ugly but I have to dig deeper into the dependencies to
-    // find its async function.
-    // Just a temp fix by timing it.
-      setTimeout (()=>{
-          this.props.editor.canvasController!.forceRender(this.props.editor.selectedObjects![0]);
-          const textLoader:Element = document.getElementsByClassName (`${textLoaderClass}on`)[0];
-          if (textLoader)
-              textLoader.className = `${textLoaderClass}off`;
-      }, 2000);
-    }
 
   initCanvasController = (controller: CanvasController) => {
     const self = this as Editor;
@@ -178,15 +154,8 @@ class Editor extends Component<Props, State> {
         event.clientY > canvasRect.bottom
       );
 
-      if (isClickOutsideCanvas) {
-        // if fill button is clicked and selected 
-        //canvas.discardActiveObject().requestRenderAll();
-        this.props.setEditor({isCanvasDeselected:true}, ()=>{ 
-          console.log('Clicked outside canvas, isCanvasDeselected: ', this.props.editor.isCanvasDeselected);
-          console.log ('fillSelected: ', this.props.editor.fillSelected);
-        });
-        
-      }
+      if (isClickOutsideCanvas) 
+        this.props.setEditor({isCanvasDeselected:true});
     });
 
     this.props.setEditor({ canvasController: controller, editorReady: true });
@@ -214,7 +183,6 @@ class Editor extends Component<Props, State> {
                       {!this.props.editor.editing || (<TextEditingTool 
                         setEditor={this.setEditorState} 
                         editor={this.props.editor} 
-                        loadFont={this.loadFont} 
                         />)}
                     </div>
                   </Row>

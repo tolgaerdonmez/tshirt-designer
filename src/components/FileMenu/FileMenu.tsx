@@ -17,30 +17,9 @@ const FileMenu:React.FC<Props> = ({editor, setEditor, style={}}) => {
     const [showExportAsImage, setShowExportAsImage] = useState(false);
     const [showExportProject, setShowExportProject] = useState(false);
     const [showImportProject, setShowImportProject] = useState(false);
-    const handlePreview = async ()=>{
-        
-        const {canvasController, previewing, tshirtId, selectedObjects} = editor;
-
-        setEditor({previewing: !editor.previewing}, ()=>{
-        if (previewing) {
-            canvasController.maskEditableArea(tshirtId, selectedObjects!);
-            // Trying to figure out why it creats copies of objects 
-            // and place the objects centered at (0,0)
-            canvasController.removeObjectsOutsideBoundary();
-            canvasController.lock();
-        }
-        else {
-            canvasController.unclipObjects();
-            canvasController.ungroupObjects();
-            canvasController.unlock();
-        }
-        canvasController.toggleEditableArea(previewing)
-        setEditor({isEditableAreaInvisible: previewing})
-        canvasController.canvas.renderAll();
-        console.log ('handlePreview, editor: ', editor);
-        });
-
-        
+    const handlePreview = ()=>{
+        const {previewing} = editor;
+        setEditor({previewing: !previewing});
     };
   return (
     <>
@@ -70,7 +49,7 @@ const FileMenu:React.FC<Props> = ({editor, setEditor, style={}}) => {
             <Dropdown.Divider />
             <Dropdown.Item 
                 eventKey="4" 
-                onClick={handlePreview}>Preview
+                onSelect={handlePreview}>Preview
             </Dropdown.Item>
         </DropdownButton>
         <ExportAsImageModal 

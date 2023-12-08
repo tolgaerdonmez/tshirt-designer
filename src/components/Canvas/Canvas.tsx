@@ -271,6 +271,7 @@ export default class Canvas extends Component<Props, State> {
     text: string,
     fontFamily: string
   ) => {
+    console.log ("updateText textObj: ", textObj);
     textObj.set({ text: text, fontFamily: fontFamily});
     this.canvas.renderAll();
   };

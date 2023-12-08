@@ -14,10 +14,9 @@ interface Props {
   // You can define props here if needed
   editor: State;
   setEditor: (editorState: Record<string, any>, callback?: () => void) => void;
-  loadFont:()=>void;
 }
 
-const TextEditingTool: React.FC<Props> = ({editor, setEditor, loadFont}) => {
+const TextEditingTool: React.FC<Props> = ({editor, setEditor}) => {
     // State example using the useState hook
     const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
         setEditor({[e.target.name]: e.target.value });
@@ -38,18 +37,7 @@ const TextEditingTool: React.FC<Props> = ({editor, setEditor, loadFont}) => {
             apiKey={google_access_key}
             activeFontFamily={editor.textFont}
             onChange={(nextFont) => {
-                setEditor({
-                textFont: nextFont.family,
-                }, ()=>{
-                    if (editor.editing) {
-                        editor.canvasController.updateText(
-                            editor.selectedObjects![0] as fabric.Textbox,
-                            editor.textInput,
-                            editor.textFont
-                        );
-                        loadFont();
-                    }
-                });
+                setEditor({textFont: nextFont.family});
             }}
             
             setActiveFontCallback={() => {
@@ -76,18 +64,26 @@ const TextEditingTool: React.FC<Props> = ({editor, setEditor, loadFont}) => {
                 (editor.foreground !== editor.tshirtColor)
                     ? editor.foreground
                     : Color.black;
-                if (!editor.editing)
-                editor.canvasController.addText(
-                    editor.textInput,
-                    editor.textFont,
-                    fillColor!);
-                else
-                editor.canvasController.updateText(
-                    editor.selectedObjects[0] as fabric.Textbox,
-                    editor.textInput,
-                    editor.textFont
-                );
-                setEditor({ textInput: "", editing: false });
+                if (!editor.editing) {
+                    editor.canvasController.addText(
+                        editor.textInput,
+                        editor.textFont,
+                        fillColor);
+                    const allObjects = editor.canvasController.canvas.getObjects();
+                    if (allObjects.length > 0) {
+                        const textObj:fabric.Object = allObjects[allObjects.length - 1];
+                        editor.canvasController.canvas.setActiveObject(textObj);
+                        setEditor({selectedObjects: textObj,editing: true});   
+                    }
+                }
+                else {
+                    editor.canvasController.updateText(
+                        editor.selectedObjects[0] as fabric.Textbox,
+                        editor.textInput,
+                        editor.textFont
+                    );
+                    setEditor({ textInput: "", editing: false });
+                }
             }}
             >
             {!editor.editing ? (

@@ -56,5 +56,6 @@ export interface State {
   previewing: boolean;
   fillSelected: boolean;
   isCanvasDeselected: boolean;
+  callback:()=>void;
   [key: string]: any;
 }
