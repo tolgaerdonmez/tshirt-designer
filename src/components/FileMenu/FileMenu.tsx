@@ -4,7 +4,7 @@ import ExportAsImageModal from './Modals/ExportAsImageModal';
 import ExportProjectModal from './Modals/ExportProjectModal';
 import ImportProjectModal from './Modals/ImportProjectModal';
 
-import State from '../../interfaces/State';
+import {State} from '../../data_type/interfaces';
 
 interface Props {
     style?: Object;
@@ -13,51 +13,64 @@ interface Props {
 }
 
 const FileMenu:React.FC<Props> = ({editor, setEditor, style={}}) => {
+
     const [showExportAsImage, setShowExportAsImage] = useState(false);
     const [showExportProject, setShowExportProject] = useState(false);
     const [showImportProject, setShowImportProject] = useState(false);
-    const handlePreview = ()=>{
+    const handlePreview = async ()=>{
+        
+        const {canvasController, previewing, tshirtId, selectedObjects} = editor;
+
         setEditor({previewing: !editor.previewing}, ()=>{
-        if (editor.previewing) {
-            editor.canvasController.maskEditableArea(editor.tshirtId!, editor.selectedObjects!);
+        if (previewing) {
+            canvasController.maskEditableArea(tshirtId, selectedObjects!);
             // Trying to figure out why it creats copies of objects 
             // and place the objects centered at (0,0)
-            editor.canvasController.removeObjectsOutsideBoundary();
+            canvasController.removeObjectsOutsideBoundary();
+            canvasController.lock();
         }
         else {
-            editor.canvasController.unclipObjects();
-            editor.canvasController.ungroupObjects();
+            canvasController.unclipObjects();
+            canvasController.ungroupObjects();
+            canvasController.unlock();
         }
-        editor.canvasController.toggleEditableArea(editor.previewing!)
-        setEditor({isEditableAreaInvisible: editor.previewing})
-        editor.canvasController.canvas.renderAll();
+        canvasController.toggleEditableArea(previewing)
+        setEditor({isEditableAreaInvisible: previewing})
+        canvasController.canvas.renderAll();
+        console.log ('handlePreview, editor: ', editor);
         });
+
+        
     };
   return (
     <>
         <DropdownButton variant="secondary" title="File" id="bg-nested-dropdown" style={style}>
+            <Dropdown.Divider />
             <Dropdown.Item 
                 eventKey="1" 
+                onSelect={(eventKey:string, event:any) => {
+                        setShowImportProject(true)
+                    }}>Import Project
+            </Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item 
+                eventKey="2" 
                 onSelect={(eventKey:string, event:any) => {
                         setShowExportAsImage(true)
                     }}>
                     Export As Image
             </Dropdown.Item>
             <Dropdown.Item 
-                eventKey="2" 
+                eventKey="3" 
                 onSelect={(eventKey:string, event:any) => {
                         setShowExportProject(true)
                     }}>Export Project
             </Dropdown.Item>
-            <Dropdown.Item 
-                eventKey="3" 
-                onSelect={(eventKey:string, event:any) => {
-                        setShowImportProject(true)
-                    }}>Import Project
-            </Dropdown.Item>
+
+            <Dropdown.Divider />
             <Dropdown.Item 
                 eventKey="4" 
-                onSelect={handlePreview}>Preview
+                onClick={handlePreview}>Preview
             </Dropdown.Item>
         </DropdownButton>
         <ExportAsImageModal 

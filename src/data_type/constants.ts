@@ -1,3 +1,9 @@
+export enum CanvasOrderDirection {
+  backwards = "backwards",
+  forwards = "forwards",
+  back = "back",
+  front = "front",
+}
 export const DEFAULT_FONT: string = "Open Sans";
 export const DEFAULT_TSHIRT_ID: string = "tshirt_0001";
 export const DEFAULT_TSHIRT_COLOR: string = "#333333";

@@ -5,7 +5,7 @@ import {
   Form
 } from "react-bootstrap";
 
-import Canvas, { CanvasController } from "../Canvas/Canvas";
+import Canvas from "../Canvas/Canvas";
 import "./Editor.css";
 
 import { fabric } from "fabric";
@@ -21,9 +21,9 @@ import {
   DEFAULT_FONT,
   DEFAULT_TSHIRT_ID,
   DEFAULT_FILL_COLOR
-} from "../../config/constants";
+} from "../../data_type/constants";
 
-import State from "../../interfaces/State";
+import {State, CanvasController} from "../../data_type/interfaces";
 import ObjectControlButtonsGroup from "../ObjectControlButtonsGroup/ObjectControlButtonsGroup";
 
 // interface Props {

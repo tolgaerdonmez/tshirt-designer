@@ -1,7 +1,7 @@
 import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import FileMenu from "./FileMenu/FileMenu";
-import State from "../interfaces/State";
+import {State} from "../data_type/interfaces";
 
 interface Props { 
   editor: State;

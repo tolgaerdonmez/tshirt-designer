@@ -3,8 +3,8 @@ import "./SideMenu.css";
 import ClickableIcon from './ClickableIcon';
 import { faShirt, faFont } from '@fortawesome/free-solid-svg-icons';
 import ImageUploadModal from './Modals/ImageUploadModal';
-import {Color, DEFAULT_FG, DEFAULT_TEXT_INPUT} from '../../config/constants';
-import State from '../../interfaces/State';
+import {Color, DEFAULT_FG, DEFAULT_TEXT_INPUT} from '../../data_type/constants';
+import {State} from '../../data_type/interfaces';
 
 interface Props {
     canvas:fabric.Canvas;

@@ -6,9 +6,9 @@ import {
 } from "react-bootstrap";
 import FontPicker from "../CustomFontPicker";
 import { google_access_key } from "../../config.json";
-import {Color} from "../../config/constants";
+import {Color} from "../../data_type/constants";
 import "./TextEditingTool.css";
-import State from "../../interfaces/State";
+import {State} from "../../data_type/interfaces";
 
 interface Props {
   // You can define props here if needed

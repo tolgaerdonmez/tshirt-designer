@@ -2,51 +2,8 @@ import React, { Component } from "react";
 import { fabric } from "fabric";
 import { saveAs } from "file-saver";
 import "./Canvas.css";
-
-export interface CanvasController {
-  canvas: fabric.Canvas;
-  getItemByName: (name: string) => any;
-  setBackground: (tShirtId: string) => void;
-  setTShirt: (tShirtId: string) => void;
-  addImage: () => void;
-  addText: (text: string, fontFamily: string, textColor: string, setActiveText?: boolean) => void;
-  updateText: (
-    textObj: fabric.Textbox,
-    text: string,
-    fontFamily: string
-  ) => void;
-  updateTextColor: (
-    textObj: fabric.Textbox,
-    textColor: string
-  ) => void;
-  deleteObjects: (objects: fabric.Object[]) => void;
-  changeObjectOrder: (
-    object: fabric.Object[],
-    direction: CanvasOrderDirection | string
-  ) => void;
-  exportToImage: (
-    format: string,
-    fileName?: string,
-    includeBackground?: boolean
-  ) => void;
-  updateTexture: (textureImgPath: string, tshirtId: string) => void;
-  updateTShirtColor: (textColorHex: string, tshirtId: string) => void;
-  exportToJSON: (fileName: string) => void;
-  importFromJSON: (json: object | fabric.Object) => void;
-  maskEditableArea: (tShirtId: string, objects: fabric.Object[]) => void;
-  removeObjectsOutsideBoundary: () => void;
-  unclipObjects: ()=> void;
-  ungroupObjects:()=> void;
-  toggleEditableArea: (show:boolean)=> void;
-  forceRender: (obj:fabric.Object)=>void;
-}
-
-export enum CanvasOrderDirection {
-  backwards = "backwards",
-  forwards = "forwards",
-  back = "back",
-  front = "front",
-}
+import { CanvasController } from "../../data_type/interfaces";
+import { CanvasOrderDirection } from "../../data_type/constants";
 
 interface Props {
   tShirtId: string;
@@ -68,6 +25,7 @@ interface State {
 //         });
 //     });
 // }
+
 
 const createEditableArea = (mask: any) => {
   return new fabric.Rect({
@@ -434,6 +392,20 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.discardActiveObject();
     this.canvas.renderAll();
   };
+
+  // lock meaning not editable
+  lock = () => { 
+    this.canvas.getObjects().forEach(obj => {
+      obj.evented = false;
+    });
+  }
+
+  // unlock meaning editable
+  unlock = () => { 
+    this.canvas.getObjects().forEach(obj => {
+      obj.evented = true;
+    });
+  }
 
   exportToImage = (
     format: string,
