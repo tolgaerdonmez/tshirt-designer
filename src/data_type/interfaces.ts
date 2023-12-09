@@ -34,7 +34,7 @@ export interface CanvasController {
   removeObjectsOutsideBoundary: () => void;
   unclipObjects: ()=> void;
   ungroupObjects:()=> void;
-  toggleEditableArea: (show:boolean)=> void;
+  togglePrintableArea: (show:boolean)=> void;
   forceRender: (obj:fabric.Object)=>void;
   lock: ()=>void;
   unlock: ()=>void;

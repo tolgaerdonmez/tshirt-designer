@@ -1,11 +1,12 @@
 import React from 'react';
 import "./SideMenu.css";
+import { OverlayTrigger, Popover } from 'react-bootstrap';
 import ClickableIcon from './ClickableIcon';
 import { faShirt, faFont } from '@fortawesome/free-solid-svg-icons';
 import ImageUploadModal from './Modals/ImageUploadModal';
 import {Color, DEFAULT_FG, DEFAULT_TEXT_INPUT} from '../../data_type/constants';
 import {State} from '../../data_type/interfaces';
-
+import TShirtSelectionGroup from '../TShirtSelectionGroup/TShirtSelectionGroup';
 interface Props {
     canvas:fabric.Canvas;
     editor:State;
@@ -14,6 +15,8 @@ interface Props {
 
 const SideMenu: React.FC<Props> = ({canvas, editor, setEditor}) => {
   
+  const placement = "right";
+
   const handleTextClick = () =>{     
     const fillColor =
       (editor.foreground !== editor.tshirtColor)
@@ -43,8 +46,22 @@ const SideMenu: React.FC<Props> = ({canvas, editor, setEditor}) => {
   // };  
   return (
     <>
-        <div className="side-toolbar">
+        <div className="side-toolbar">         
+            <OverlayTrigger
+              trigger="click"
+              key={placement}
+              placement={placement}
+              overlay={
+                <Popover id={`popover-positioned-${placement}`}>
+                  <Popover.Title as="h3">{`T-Shirt Style`}</Popover.Title>
+                  <Popover.Content>
+                    <TShirtSelectionGroup editor={editor} setEditor={setEditor} />
+                  </Popover.Content>
+                </Popover>
+              }
+            >
             <ClickableIcon fontAwesomeIcon={faShirt} text="T-Shirt" />
+            </OverlayTrigger>
             <ImageUploadModal canvas={canvas} />
             <ClickableIcon fontAwesomeIcon={faFont} text="Text" onClick={handleTextClick} />
             {/* <ClickableIcon fontAwesomeIcon={faFill} text="Color" onClick={handleFillClick} /> */}

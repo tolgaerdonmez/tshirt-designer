@@ -162,7 +162,7 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.renderAll();
   }
 
-  toggleEditableArea = (show:boolean) => { 
+  togglePrintableArea = (show:boolean) => { 
     const allObjects = this.canvas.getObjects();
     const editableArea:fabric.Object | undefined = allObjects.find((obj) => obj.name === "editableArea");
     if (editableArea) { 

@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import {
   Col,
-  Row,
-  Form
+  Row
 } from "react-bootstrap";
 
 import Canvas from "../Canvas/Canvas";
@@ -14,7 +13,7 @@ import TextEditingTool from "../TextEditingTool/TextEditingTool";
 import SideMenu from "../SideMenu/SideMenu";
 import TextLoader from "../TextLoader/TextLoader";
 import TextureButtonsGroup from "../TextureButtonsGroup/TextureButtonsGroup";
-import TShirtSelectionGroup from "../TShirtSelectionGroup/TShirtSelectionGroup";
+import HidePrintableAreaSwitch from "../HidePrintableAreaSwitch/HidePrintableAreaSwitch";
 
 import {
   DEFAULT_FONT,
@@ -24,11 +23,6 @@ import {
 
 import {State, CanvasController} from "../../data_type/interfaces";
 import ObjectControlButtonsGroup from "../ObjectControlButtonsGroup/ObjectControlButtonsGroup";
-
-// interface Props {
-//   editor:Object;
-//   setEditor: (state:Record<string, any>, callback?:()=>void)=>void;
-// }
 
 interface Props {
   editor:State;
@@ -187,9 +181,6 @@ class Editor extends Component<Props, State> {
                     </div>
                   </Row>
                   <Row>
-                      <TShirtSelectionGroup editor={this.props.editor} setEditor={this.setEditorState} />
-                  </Row>
-                  <Row>
                       {
                       // (true) ||
                       (this.props.editor.fillSelected && 
@@ -215,20 +206,7 @@ class Editor extends Component<Props, State> {
             </Col>            
             <Col xs={6} className="editor-container">
                   <Row>
-                  <Form>
-                    <Form.Check 
-                      type="checkbox" 
-                      id="myCheckbox" 
-                      label="Hide Printable Area"
-                      onChange={
-                        (e:React.ChangeEvent<HTMLInputElement>)=>{
-                          const checked = e.currentTarget.checked;
-                          this.props.editor.canvasController!.toggleEditableArea(checked)
-                          this.props.setEditor({isEditableAreaInvisible: checked})
-                        } 
-                      }
-                      />
-                  </Form>
+                    <HidePrintableAreaSwitch editor={this.props.editor} setEditor={this.props.setEditor} />
                   </Row>              
                 <Canvas
                   tShirtId={DEFAULT_TSHIRT_ID}

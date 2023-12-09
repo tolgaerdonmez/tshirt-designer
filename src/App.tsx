@@ -88,7 +88,7 @@ const App: React.FC = () => {
           canvasController.ungroupObjects();
           canvasController.unlock();
       }
-      canvasController.toggleEditableArea(previewing)
+      canvasController.togglePrintableArea(previewing)
       handleEditorState({isEditableAreaInvisible: previewing})
       canvasController.canvas.renderAll();
     }
