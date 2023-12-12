@@ -1,19 +1,19 @@
-import React, { ReactElement, useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { Button, Modal, Form, FormControl, Tabs, Tab } from "react-bootstrap";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { fabric } from "fabric";
-import ClickableIcon from "../ClickableIcon";
 
-interface Props {
-  canvas: fabric.Canvas;
+interface Props { 
+  show:boolean;
+  setShow: (visible:boolean)=>void;
+  canvas:fabric.Canvas;
 }
 
-function ImageUploadModal({ canvas }: Props): ReactElement {
-  const [show, setShow] = useState(false);
+const ImageUploadModal: React.FC<Props> = ({show, setShow, canvas}) => {
+  // const [show, setShow] = useState(false);
   const [imageURL, setImageURL] = useState("");
   const [imageName, setImageName] = useState("image");
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  
 
   const handleFileOnChange = (e: ChangeEvent<HTMLInputElement> | any) => {
     let file: File = e.target.files[0];
@@ -64,12 +64,6 @@ function ImageUploadModal({ canvas }: Props): ReactElement {
 
   return (
     <>
-      {/* <Button variant="primary" onClick={handleShow}>
-        <i className="fas fa-image mr-1"></i>
-        Add Image
-      </Button> */}
-
-      <ClickableIcon fontAwesomeIcon={faUpload} text="Upload" onClick={handleShow} />
       <Modal show={show} onHide={handleClose}>
         <Modal.Body>
           <Tabs defaultActiveKey="upload" id="uncontrolled-tab-example">

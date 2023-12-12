@@ -91,12 +91,10 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
   const handleColorSelection = (color: any) => {
     setEditor(
       {
-        foreground: color.hex,
-        currentColor: hexToRGBA(color.hex, 255),
+        foregroundColor: color.hex
       },
       () => {
-        console.log ('editor.foreground: ', editor.foreground);
-         console.log ('editor.foreground again: ', editor.foreground);
+        console.log ('editor.foregroundColor: ', editor.foregroundColor);
         const inputElements = document.querySelectorAll("input");
         const allNotActive = Array.from(inputElements).every(
           (element) => !element.disabled
@@ -107,14 +105,14 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
           allNotActive
         ) {
           editor.canvasController.updateTShirtColor(
-            editor.foreground,
+            editor.foregroundColor,
             editor.tshirtId
           );
-          setEditor({ tshirtColor: editor.foreground });
+          setEditor({ tshirtColor: editor.foregroundColor });
         } else if (editor.editing) {
           editor.canvasController.updateTextColor(
             editor.selectedObjects[0] as fabric.Textbox,
-            editor.foreground
+            editor.foregroundColor
           );
         }
       }
@@ -154,7 +152,7 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
             editing: canEdit,
             textInput: canEdit ? (textbox as any).text : "",
             textFont: canEdit ? (textbox as any).fontFamily : DEFAULT_FONT,
-            currentColor: canEdit ? (textbox as any).fill : DEFAULT_FILL_COLOR,
+            foregroundColor: canEdit ? (textbox as any).fill : DEFAULT_FILL_COLOR,
           },
           () => {
             if (canEdit) syncText(textbox);
@@ -166,7 +164,7 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
           editing: false,
           textInput: "",
           textFont: DEFAULT_FONT,
-          currentColor: DEFAULT_FILL_COLOR,
+          foregroundColor: DEFAULT_FILL_COLOR,
         });
       }
       setEditor({ isCanvasDeselected: false });
@@ -224,7 +222,7 @@ const Editor: React.FC<Props> = ({ editor, setEditor }) => {
                   {editor.fillSelected &&
                     !editor.isCanvasDeselected && (
                       <ColorSelector
-                        color={editor.foreground}
+                        color={editor.foregroundColor}
                         handleChangeComplete={(color: string) => {
                           handleColorSelection(color);
                         }}

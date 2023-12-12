@@ -4,37 +4,36 @@ import {
   Row
 } from "react-bootstrap";
 
-import Canvas from "../Canvas/Canvas";
+import Canvas from "./Canvas/Canvas";
 import "./Editor.css";
 
-import ColorSelector from "../ColorSelector/SketchPicker";
-// import PreviewModal from "../Modals/Image/PreviewModel";
-import TextEditingTool from "../TextEditingTool/TextEditingTool";
+import ColorSelector from "./ColorSelector/SketchPicker";
+import TextEditingTool from "./TextEditingTool/TextEditingTool";
 import SideMenu from "../SideMenu/SideMenu";
-import TextLoader from "../TextLoader/TextLoader";
-import TextureButtonsGroup from "../TextureButtonsGroup/TextureButtonsGroup";
-import HidePrintableAreaSwitch from "../HidePrintableAreaSwitch/HidePrintableAreaSwitch";
+import TextLoader from "./TextLoader/TextLoader";
+import TextureButtonsGroup from "./TextureButtonsGroup/TextureButtonsGroup";
+import HidePrintableAreaSwitch from "./HidePrintableAreaSwitch/HidePrintableAreaSwitch";
 
 import {
+  DEFAULT_FG,
   DEFAULT_FONT,
   DEFAULT_TSHIRT_ID,
-  DEFAULT_FILL_COLOR
 } from "../../data_type/constants";
 
 import {State, CanvasController} from "../../data_type/interfaces";
-import ObjectControlButtonsGroup from "../ObjectControlButtonsGroup/ObjectControlButtonsGroup";
+import ObjectControlButtonsGroup from "./ObjectControlButtonsGroup/ObjectControlButtonsGroup";
 
 interface Props {
   editor:State;
   setEditor:(editorState:Record<string, any>, callback?:()=>void)=>void;
 }
 
-const hexToRGBA = (hex: string, alpha: number): string => {
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
-  return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-};
+// const hexToRGBA = (hex: string, alpha: number): string => {
+//   let r = parseInt(hex.slice(1, 3), 16);
+//   let g = parseInt(hex.slice(3, 5), 16);
+//   let b = parseInt(hex.slice(5, 7), 16);
+//   return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+// };
 class Editor extends Component<Props, State> {
 
   syncText = (textbox:any)=> { 
@@ -53,8 +52,7 @@ class Editor extends Component<Props, State> {
   handleColorSelection = (color: any) => {
     this.props.setEditor(
       {
-        foreground: color.hex,
-        currentColor: hexToRGBA(color.hex, 255),
+        foregroundColor: color.hex,
       }, () => {
         // Get all elements in the HTML document
         const inputElements = document.querySelectorAll("input");
@@ -65,14 +63,14 @@ class Editor extends Component<Props, State> {
         // only tshirt is selected on the canvas
         if (this.props.editor.selectedObjects.length === 0 && allNotActive) {
           this.props.editor.canvasController.updateTShirtColor(
-            this.props.editor.foreground,
+            this.props.editor.foregroundColor,
             this.props.editor.tshirtId,
           );
-          this.props.setEditor({ tshirtColor: this.props.editor.foreground});
+          this.props.setEditor({ tshirtColor: this.props.editor.foregroundColor});
         } else if (this.props.editor.editing) {  // text is selected
               this.props.editor.canvasController.updateTextColor (
                 this.props.editor.selectedObjects[0] as fabric.Textbox,
-                this.props.editor.foreground
+                this.props.editor.foregroundColor
               );
         }
         this.props.setEditor({isCanvasDeselected:false});
@@ -91,9 +89,9 @@ class Editor extends Component<Props, State> {
           editing: canEdit,
           textInput: canEdit ? (textbox as any).text : "",
           textFont: canEdit ? (textbox as any).fontFamily : DEFAULT_FONT,
-          currentColor: canEdit
+          foregroundColor: canEdit
             ? (textbox as any).fill
-            : DEFAULT_FILL_COLOR,
+            : DEFAULT_FG,
         }, ()=> { 
           if (canEdit)
             this.syncText(textbox);  // to ensure canvas text matches html textbox value
@@ -104,7 +102,7 @@ class Editor extends Component<Props, State> {
           editing: false,
           textInput: "",
           textFont: DEFAULT_FONT,
-          currentColor: DEFAULT_FILL_COLOR,
+          foregroundColor: DEFAULT_FG,
         });
         // console.log ('mouse:down, isCanvasDeselected: ', self.state.isCanvasDeselected);
         // console.log ('fillSelected: ', self.state.fillSelected);
@@ -195,7 +193,7 @@ class Editor extends Component<Props, State> {
                   /* ***** Need to check type is text or canvas */
                   (this.props.editor.fillSelected && !this.props.editor.isCanvasDeselected) &&
                   (<ColorSelector
-                    color={this.props.editor.foreground}
+                    color={this.props.editor.foregroundColor}
                     handleChangeComplete={(color: string) => {
                       this.handleColorSelection(color);
                     }}

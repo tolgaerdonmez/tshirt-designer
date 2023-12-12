@@ -5,10 +5,10 @@ import {
   FormControl
 } from "react-bootstrap";
 import FontPicker from "../CustomFontPicker";
-import { google_access_key } from "../../config.json";
-import {Color} from "../../data_type/constants";
+import { google_access_key } from "../../../config.json";
+import {Color} from "../../../data_type/constants";
 import "./TextEditingTool.css";
-import {State} from "../../data_type/interfaces";
+import {State} from "../../../data_type/interfaces";
 
 interface Props {
   // You can define props here if needed
@@ -61,8 +61,8 @@ const TextEditingTool: React.FC<Props> = ({editor, setEditor}) => {
             className="h-"
             onClick={() => {
                 const fillColor =
-                (editor.foreground !== editor.tshirtColor)
-                    ? editor.foreground
+                (editor.foregroundColor !== editor.tshirtColor)
+                    ? editor.foregroundColor
                     : Color.black;
                 if (!editor.editing) {
                     editor.canvasController.addText(

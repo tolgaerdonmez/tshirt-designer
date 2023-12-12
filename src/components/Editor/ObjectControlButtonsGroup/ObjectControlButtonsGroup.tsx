@@ -3,8 +3,8 @@ import {
   Button,
   ButtonGroup,
 } from "react-bootstrap";
-import {State} from "../../data_type/interfaces";
-import { CanvasOrderDirection } from '../../data_type/constants';
+import {State} from "../../../data_type/interfaces";
+import { CanvasOrderDirection } from '../../../data_type/constants';
 
 interface Props {
   // You can define props here if needed

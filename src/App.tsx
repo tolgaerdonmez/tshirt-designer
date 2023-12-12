@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fabric } from "fabric";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar/Navbar";
 import Editor from "./components/Editor/Editor";
 import { State, CanvasController } from "./data_type/interfaces";
 import "./App.css";
@@ -9,8 +9,7 @@ import {
   DEFAULT_FG,
   DEFAULT_FONT,
   DEFAULT_TSHIRT_COLOR,
-  DEFAULT_TSHIRT_ID,
-  DEFAULT_FILL_COLOR
+  DEFAULT_TSHIRT_ID
 } from "./data_type/constants";
 
 const App: React.FC = () => {
@@ -21,8 +20,7 @@ const App: React.FC = () => {
     textFont: DEFAULT_FONT,
     editing: false,
     selectedObjects: [] as fabric.Object[],
-    foreground: DEFAULT_FG,
-    currentColor: DEFAULT_FILL_COLOR,
+    foregroundColor: DEFAULT_FG,
     textureImgPath: "",
     tshirtId: DEFAULT_TSHIRT_ID,
     tshirtColor: DEFAULT_TSHIRT_COLOR,
@@ -128,11 +126,10 @@ const App: React.FC = () => {
   //     const {editorReady, 
   //           selectedObjects, 
   //           canvasController, 
-  //           foreground, 
-  //           currentColor, 
+  //           foregroundColor, 
   //           tshirtId, 
   //           editing} = state;
-  //     if (editorReady && foreground && currentColor) 
+  //     if (editorReady && foregroundColor) 
   //     {
   //       const inputElements = document.querySelectorAll("input");
   //       // Check if all elements are not selected
@@ -142,20 +139,20 @@ const App: React.FC = () => {
   //       // only tshirt is selected on the canvas
   //       if (selectedObjects.length === 0 && allNotActive) {
   //         canvasController.updateTShirtColor(
-  //           foreground,
+  //           foregroundColor,
   //           tshirtId,
   //         );
-  //         handleEditorState({ tshirtColor: foreground});
+  //         handleEditorState({ tshirtColor: foregroundColor});
   //       } else if (editing) {  // text is selected
   //             canvasController.updateTextColor (
   //               selectedObjects[0] as fabric.Textbox,
-  //               foreground
+  //               foregroundColor
   //             );
   //       }
   //       handleEditorState({isCanvasDeselected:false});
   //     }
   //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [state.foreground, state.currentColor]);
+  // }, [state.foregroundColor, state.foregroundColor]);
 
   return (
     <>

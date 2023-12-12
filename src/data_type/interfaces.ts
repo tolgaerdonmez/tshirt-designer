@@ -46,9 +46,8 @@ export interface State {
   textInput: string;
   textFont: string;
   editing: boolean;
-  currentColor: string;
+  foregroundColor: string;
   selectedObjects: fabric.Object[];
-  foreground: string;
   textureImgPath: string;
   tshirtId: string;
   tshirtColor: string;

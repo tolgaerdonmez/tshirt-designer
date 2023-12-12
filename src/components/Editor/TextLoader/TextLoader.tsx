@@ -1,5 +1,5 @@
 import React from 'react';
-import "../../bootstrap.min.css";
+import "../../../bootstrap.min.css";
 import "./TextLoader.css";
 
 interface Props {

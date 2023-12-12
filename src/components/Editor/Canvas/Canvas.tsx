@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { fabric } from "fabric";
 import { saveAs } from "file-saver";
 import "./Canvas.css";
-import { CanvasController } from "../../data_type/interfaces";
-import { CanvasOrderDirection } from "../../data_type/constants";
+import { CanvasController } from "../../../data_type/interfaces";
+import { CanvasOrderDirection } from "../../../data_type/constants";
 
 interface Props {
   tShirtId: string;

@@ -4,7 +4,7 @@ import ExportAsImageModal from './Modals/ExportAsImageModal';
 import ExportProjectModal from './Modals/ExportProjectModal';
 import ImportProjectModal from './Modals/ImportProjectModal';
 
-import {State} from '../../data_type/interfaces';
+import {State} from '../../../data_type/interfaces';
 
 interface Props {
     style?: Object;

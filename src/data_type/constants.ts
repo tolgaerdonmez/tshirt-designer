@@ -9,9 +9,8 @@ export const DEFAULT_TSHIRT_ID: string = "tshirt_0001";
 export const DEFAULT_TSHIRT_COLOR: string = "#333333";
 export const DEFAULT_TEXT_INPUT: string = "Text";
 export enum Color {
-  white = "rgba(255, 255, 255, 255)",
-  black = "rgba(0, 0, 0, 0)",
+  white = "#FFFFFF",
+  black = "#000000",
 };
-export const DEFAULT_FILL_COLOR = Color.black;
 // foreground takes a hex value (will need to be consistent with the color value format)
-export const DEFAULT_FG: string = "#000";  // black
+export const DEFAULT_FG: string = Color.black;  // black

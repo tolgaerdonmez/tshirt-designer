@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
-import { State } from "../../data_type/interfaces";
+import { State } from "../../../data_type/interfaces";
 
 interface Props {
     // You can define props here if needed

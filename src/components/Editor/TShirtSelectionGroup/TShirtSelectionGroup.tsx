@@ -1,6 +1,6 @@
 import React from 'react'
 import Thumbnail from '../Thumbnail/Thumbnail';
-import {State} from "../../data_type/interfaces";
+import {State} from "../../../data_type/interfaces";
 
 
 interface Props {
