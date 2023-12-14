@@ -119,6 +119,7 @@ const App: React.FC = () => {
      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.textFont]);
 
+  
   // useEffect(()=>{
   //       // Get all elements in the HTML document
   //     const {editorReady, 

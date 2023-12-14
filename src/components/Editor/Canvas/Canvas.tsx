@@ -66,13 +66,14 @@ export default class Canvas extends Component<Props, State> {
   
 
   createEditableArea = (mask: any) => {
+    const {tshirtId} = this.props.editor;
     return new EditableArea({
       left: mask.offsetLeft,
       top: mask.offsetTop,
       width: mask.w,
       height: mask.h,
       name: "editableArea",
-      id: this.props.editor.tShirtId,
+      id: tshirtId,
       selectable: false,
       hoverCursor: 'auto',
       fill: "white",
@@ -346,6 +347,8 @@ export default class Canvas extends Component<Props, State> {
     fabric.loadSVGFromURL(svgUrl, (objects) => {
       fabric.util.loadImage(textureImgPath, (img) => {
         objects.forEach((obj, i) => {
+          // i is the layer of the svg that the 
+          // texture will be mapped to
           if (
             (tshirtId === "tshirt_0001" && i === 2) ||
             (tshirtId === "tshirt_0002" && i === 0)
@@ -473,21 +476,45 @@ export default class Canvas extends Component<Props, State> {
     }
   };
 
+  // ()=>{
+  //   const {canvasController:controller, tshirtId} = this.props.editor;
+  //   if (controller !== undefined)
+  //     this.props.initCanvasController({ ...(this as CanvasController) });
+  //   // setting the background image
+  //   if (tshirtId)
+  //     this.setBackground();
+  // }
   importFromJSON = (json: object | fabric.Object) => {
     const self = this as Canvas;
     const {setEditor} = this.props;
-    this.canvas.loadFromJSON(json, () => {
-      const editableArea:any = self.getItemByName("editableArea");
-      if (editableArea) {
-        self.canvas.selection = true;
-        editableArea.selectable = false;
-        editableArea.lockMovementX = false;
-        editableArea.lockMovementY = false;
-        setEditor({tShirtId: editableArea.id});
-        self.canvas.renderAll();
-      }
-      this.canvas.renderAll();
-    });
+    const {objects} = (json as any);
+    console.log ('json objects: ', (json as any).objects);
+    if (objects) {
+        objects.forEach((obj:any)=>{
+        const {id:tshirtId}=obj;
+        if (tshirtId === "tshirt_0001" || tshirtId === "tshirt_0002") {
+                    
+          setEditor({tshirtId:tshirtId}, ()=>{
+            if (this.props.editor.canvasController !== undefined)
+            this.props.initCanvasController({ ...(this as CanvasController) });
+          
+            this.setBackground ();   
+
+            this.canvas.loadFromJSON(json, () => {
+              const editableArea:any = self.getItemByName("editableArea");
+              if (editableArea) {
+                editableArea.selectable = false;
+                self.canvas.renderAll();
+              }
+            });
+          });      
+
+          // exit from forEach callback
+          return true;
+        }  
+      });
+
+    }
   };
 
   render() {

@@ -165,7 +165,7 @@ class Editor extends Component<Props, State> {
                   </Row>
                   <Row className="d-flex">
                   {
-                  /* ***** Need to check type is text or canvas */
+                  /* Need to check whether fabric object type is text or canvas */
                   (this.props.editor.fillSelected && !this.props.editor.isCanvasDeselected) &&
                   (<ColorSelector
                     color={this.props.editor.foregroundColor}
