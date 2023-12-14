@@ -13,8 +13,6 @@ function ImportProjectModal({ show, setShow, importFunction }: Props): ReactElem
 	const [canvasJSON, setCanvasJSON] = useState({} as object | fabric.Object);
 	const [fileName, setFileName] = useState("file");
 	const handleClose = () => setShow(false);
-	//const handleShow = () => setShow(true);
-
 	const handleFileOnChange = (e: ChangeEvent<HTMLInputElement> | any) => {
 		const file: File = e.target.files[0];
 		let reader = new FileReader();

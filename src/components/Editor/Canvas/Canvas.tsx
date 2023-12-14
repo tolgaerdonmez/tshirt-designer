@@ -4,15 +4,37 @@ import { saveAs } from "file-saver";
 import "./Canvas.css";
 import { CanvasController } from "../../../data_type/interfaces";
 import { CanvasOrderDirection } from "../../../data_type/constants";
+import { State } from "../../../data_type/interfaces";
 
 interface Props {
-  tShirtId: string;
-  tshirt?: string;
-  controller?: (controller: CanvasController) => void;
+  initCanvasController: (controller: CanvasController) => void;
+  editor:State;
+  setEditor:(editorState:Record<string, any>, callback?:()=>void)=>void;
 }
-interface State {
+// interface State {
+// }
+
+interface IMyObjectOptions extends fabric.IObjectOptions {
+  id?: string;
+  name?: string;
 }
 
+// extending Rect object so attributes can be exported
+//  in project files
+class EditableArea extends fabric.Rect {
+  id: string;
+  name: string;
+
+  constructor(options: IMyObjectOptions) {
+    super(options);
+    this.id = options.id || '';
+    this.name = options.name || '';
+  }
+
+  toObject(propertiesToInclude: string[] = []): any {
+    return super.toObject(propertiesToInclude.concat(['id', 'name']));
+  }
+}
 
 // const loadImage = (url: string) => {
 //     return new Promise((resolve, reject) => {
@@ -26,36 +48,41 @@ interface State {
 //     });
 // }
 
-
-const createEditableArea = (mask: any) => {
-  return new fabric.Rect({
-    left: mask.offsetLeft,
-    top: mask.offsetTop,
-    width: mask.w,
-    height: mask.h,
-    name: "editableArea",
-    selectable: false,
-    hoverCursor: 'auto',
-    fill: "white",
-    opacity: 0.3,
-    stroke: 'black',
-    strokeWidth: 2,
-    strokeDashArray: [5, 2], // Dashed border pattern
-  });
-}
 export default class Canvas extends Component<Props, State> {
   canvas!: fabric.Canvas;
 
   componentDidMount() {
+
+    const {canvasController:controller, tshirtId} = this.props.editor;
+    
     //creating the canvas
-    //this.canvas = new fabric.Canvas("c", { renderOnAddRemove: true });
     this.canvas = new fabric.Canvas("c");
-    if (this.props.controller !== undefined)
-      this.props.controller({ ...(this as CanvasController) });
+    if (controller !== undefined)
+      this.props.initCanvasController({ ...(this as CanvasController) });
     // setting the background image
-    if (this.props.tshirt !== undefined)
-      this.setBackground(this.props.tShirtId);
+    if (tshirtId)
+      this.setBackground();
   }
+  
+
+  createEditableArea = (mask: any) => {
+    return new EditableArea({
+      left: mask.offsetLeft,
+      top: mask.offsetTop,
+      width: mask.w,
+      height: mask.h,
+      name: "editableArea",
+      id: this.props.editor.tShirtId,
+      selectable: false,
+      hoverCursor: 'auto',
+      fill: "white",
+      opacity: 0.3,
+      stroke: 'black',
+      strokeWidth: 2,
+      strokeDashArray: [5, 2], // Dashed border pattern
+    });
+  }
+
 
   getItemByName(name:string) { 
     let result = null;
@@ -171,7 +198,7 @@ export default class Canvas extends Component<Props, State> {
     }
   }
 
-  maskEditableArea = (tShirtId: string, objects: fabric.Object[]) => { 
+  maskEditableArea = (objects: fabric.Object[]) => { 
     const allObjects = this.canvas.getObjects();
     let groupedObjects:any = [];
     allObjects.forEach((obj)=>{
@@ -204,9 +231,11 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.requestRenderAll();
   }
 
-  setBackground = (tShirtId: string) => {
-    
-    fabric.Image.fromURL(this.getPathById(tShirtId), (img) => {
+  setBackground = () => {
+
+    const {tshirtId} = this.props.editor;
+     
+    fabric.Image.fromURL(this.getPath(), (img) => {
       const h: number = img.getScaledHeight();
       const w: number = img.getScaledWidth();
       this.canvas.setHeight(h);
@@ -226,10 +255,10 @@ export default class Canvas extends Component<Props, State> {
         this.canvas.remove(retrievedObject);
       }
 
-      let mask = (tShirtId === 'tshirt_0001')?
+      let mask = (tshirtId === 'tshirt_0001')?
         { w: 200, h: 300, offsetLeft: (w - 200) / 2, offsetTop: 20 + (h - 300) / 2 }:
         { w: 180, h: 275, offsetLeft: (w - 180) / 2, offsetTop: 20 + (h - 275) / 2 };
-      const editableArea = createEditableArea(mask);
+      const editableArea = this.createEditableArea(mask);
 
       this.canvas.add(editableArea);
       this.canvas.sendToBack(editableArea);
@@ -237,10 +266,6 @@ export default class Canvas extends Component<Props, State> {
       // Add both the mask and content to the canvas
       this.canvas.renderAll();
     });
-  };
-
-  setTShirt = (tShirtId: string) => {
-    this.setBackground(tShirtId);
   };
   
   addImage = () => {
@@ -284,8 +309,9 @@ export default class Canvas extends Component<Props, State> {
     this.canvas.renderAll();
   };
   
-  updateTShirtColor = (textColorHex: string, tshirtId: string) => {
-    let svgUrl = this.getPathById(tshirtId);
+  updateTShirtColor = (textColorHex: string) => {
+    let svgUrl = this.getPath();
+    const {tshirtId} = this.props.editor;
     fabric.loadSVGFromURL(svgUrl, (objects) => {
       objects.forEach((obj, i) => {
         if (
@@ -303,7 +329,8 @@ export default class Canvas extends Component<Props, State> {
     });
   };
 
-  updateTexture = (textureImgPath: string, tshirtId: string) => {
+  updateTexture = (textureImgPath: string) => {
+    const {tshirtId} = this.props.editor;
     const svgName = tshirtId + "_fill";
     // Get all objects on the canvas
     const objects = this.canvas.getObjects();
@@ -315,7 +342,7 @@ export default class Canvas extends Component<Props, State> {
       // SVG object found, remove it from the canvas
       this.canvas.remove(svgObject);
 
-    let svgUrl = this.getPathById(tshirtId);
+    let svgUrl = this.getPath();
     fabric.loadSVGFromURL(svgUrl, (objects) => {
       fabric.util.loadImage(textureImgPath, (img) => {
         objects.forEach((obj, i) => {
@@ -347,8 +374,9 @@ export default class Canvas extends Component<Props, State> {
     });
   };
 
-  getPathById = (id: string) => {
-    switch (id) {
+  getPath = () => {
+    const {tshirtId} = this.props.editor;
+    switch (tshirtId) {
       case "tshirt_0001":
         return "images/tshirt.svg";
       case "tshirt_0002":
@@ -422,7 +450,7 @@ export default class Canvas extends Component<Props, State> {
         this.canvas.getElement().toBlob((data: any) => {
           saveAs(data, fileName + "." + format);
         });
-        this.setBackground(this.props.tShirtId);
+        this.setBackground();
       } else {
         this.canvas.renderAll();
         this.canvas.getElement().toBlob((data: any) => {
@@ -446,7 +474,18 @@ export default class Canvas extends Component<Props, State> {
   };
 
   importFromJSON = (json: object | fabric.Object) => {
+    const self = this as Canvas;
+    const {setEditor} = this.props;
     this.canvas.loadFromJSON(json, () => {
+      const editableArea:any = self.getItemByName("editableArea");
+      if (editableArea) {
+        self.canvas.selection = true;
+        editableArea.selectable = false;
+        editableArea.lockMovementX = false;
+        editableArea.lockMovementY = false;
+        setEditor({tShirtId: editableArea.id});
+        self.canvas.renderAll();
+      }
       this.canvas.renderAll();
     });
   };

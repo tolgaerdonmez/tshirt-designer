@@ -3,8 +3,8 @@ import { CanvasOrderDirection } from "./constants";
 export interface CanvasController {
   canvas: fabric.Canvas;
   getItemByName: (name: string) => any;
-  setBackground: (tShirtId: string) => void;
-  setTShirt: (tShirtId: string) => void;
+  getPath:()=>string;
+  setBackground: () => void;
   addImage: () => void;
   addText: (text: string, fontFamily: string, textColor: string, setActiveText?: boolean) => void;
   updateText: (
@@ -26,11 +26,11 @@ export interface CanvasController {
     fileName?: string,
     includeBackground?: boolean
   ) => void;
-  updateTexture: (textureImgPath: string, tshirtId: string) => void;
-  updateTShirtColor: (textColorHex: string, tshirtId: string) => void;
+  updateTexture: (textureImgPath: string) => void;
+  updateTShirtColor: (textColorHex: string) => void;
   exportToJSON: (fileName: string) => void;
   importFromJSON: (json: object | fabric.Object) => void;
-  maskEditableArea: (tShirtId: string, objects: fabric.Object[]) => void;
+  maskEditableArea: (objects: fabric.Object[]) => void;
   removeObjectsOutsideBoundary: () => void;
   unclipObjects: ()=> void;
   ungroupObjects:()=> void;

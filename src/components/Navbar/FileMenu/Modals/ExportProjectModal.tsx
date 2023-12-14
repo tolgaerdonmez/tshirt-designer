@@ -19,7 +19,7 @@ function ExportProjectModal({ exportFunction, show, setShow }: Props): ReactElem
 		console.log(error);
 	}
 	// const [show, setShow] = useState(false);
-	const [fileName, setFileName] = useState("");
+	const [fileName, setFileName] = useState("untitled");
 
 	const handleClose = () => setShow(false);
 	// const handleShow = () => setShow(true);

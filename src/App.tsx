@@ -69,13 +69,12 @@ const App: React.FC = () => {
     const { editorReady, 
             previewing, 
             canvasController, 
-            tshirtId, 
             selectedObjects } = state;
 
     if(editorReady) 
     {      
       if (previewing) {
-          canvasController.maskEditableArea(tshirtId, selectedObjects!);
+          canvasController.maskEditableArea(selectedObjects);
           // Trying to figure out why it creats copies of objects 
           // and place the objects centered at (0,0)
           canvasController.removeObjectsOutsideBoundary();
@@ -94,10 +93,9 @@ const App: React.FC = () => {
   },[state.previewing]);
 
   useEffect(()=>{
-    const {editorReady, canvasController, tshirtId} = state;
-    console.log ('useEffect tshirtId: ', tshirtId);
+    const {editorReady, canvasController} = state;
     if(editorReady) 
-      canvasController.setTShirt(tshirtId); 
+      canvasController.setBackground();
     // eslint-disable-next-line react-hooks/exhaustive-deps 
   },[state.tshirtId])
 

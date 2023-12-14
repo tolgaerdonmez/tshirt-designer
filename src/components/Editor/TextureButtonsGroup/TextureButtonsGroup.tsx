@@ -10,8 +10,7 @@ const TextureButtonsGroup:React.FC<Props> = ({editor, setEditor}) => {
     const selectionEventHandler = (e: any) => {
             // map texture
             editor.canvasController.updateTexture(
-                e.target.getAttribute("src"),
-                editor.tshirtId!
+                e.target.getAttribute("src")
             );
             setEditor({isCanvasDeselected:false});
         }

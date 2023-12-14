@@ -4,7 +4,7 @@ import { OverlayTrigger, Popover } from 'react-bootstrap';
 import ClickableIcon from './ClickableIcon';
 import { faShirt, faFont, faUpload } from '@fortawesome/free-solid-svg-icons';
 import ImageUploadModal from './Modals/ImageUploadModal';
-import {Color, DEFAULT_FG, DEFAULT_TEXT_INPUT} from '../../data_type/constants';
+import {Color, DEFAULT_TEXT_INPUT} from '../../data_type/constants';
 import {State} from '../../data_type/interfaces';
 import TShirtSelectionGroup from '../Editor/TShirtSelectionGroup/TShirtSelectionGroup';
 interface Props {
@@ -23,11 +23,11 @@ const SideMenu: React.FC<Props> = ({canvas, editor, setEditor}) => {
       (editor.foregroundColor !== editor.tshirtColor)
           ? editor.foregroundColor
           : Color.black;
-      //if (!editor.editing) { 
+    
         editor.canvasController.addText(
           DEFAULT_TEXT_INPUT,
           editor.textFont,
-          DEFAULT_FG,
+          fillColor,
           true 
         );
         const allObjects = editor.canvasController.canvas.getObjects();

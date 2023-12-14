@@ -17,7 +17,6 @@ import HidePrintableAreaSwitch from "./HidePrintableAreaSwitch/HidePrintableArea
 import {
   DEFAULT_FG,
   DEFAULT_FONT,
-  DEFAULT_TSHIRT_ID,
 } from "../../data_type/constants";
 
 import {State, CanvasController} from "../../data_type/interfaces";
@@ -63,8 +62,7 @@ class Editor extends Component<Props, State> {
         // only tshirt is selected on the canvas
         if (this.props.editor.selectedObjects.length === 0 && allNotActive) {
           this.props.editor.canvasController.updateTShirtColor(
-            this.props.editor.foregroundColor,
-            this.props.editor.tshirtId,
+            this.props.editor.foregroundColor
           );
           this.props.setEditor({ tshirtColor: this.props.editor.foregroundColor});
         } else if (this.props.editor.editing) {  // text is selected
@@ -94,7 +92,7 @@ class Editor extends Component<Props, State> {
             : DEFAULT_FG,
         }, ()=> { 
           if (canEdit)
-            this.syncText(textbox);  // to ensure canvas text matches html textbox value
+            this.syncText(textbox);  // sync canvas text and html textbox value
         });      
       } else {
         this.props.setEditor({
@@ -104,8 +102,6 @@ class Editor extends Component<Props, State> {
           textFont: DEFAULT_FONT,
           foregroundColor: DEFAULT_FG,
         });
-        // console.log ('mouse:down, isCanvasDeselected: ', self.state.isCanvasDeselected);
-        // console.log ('fillSelected: ', self.state.fillSelected);
       }
       self.props.setEditor({ isCanvasDeselected: false});
     });
@@ -122,19 +118,6 @@ class Editor extends Component<Props, State> {
       console.log ('fillSelected: ', self.props.editor.fillSelected);
       });
     });
-
-
-    // controller.canvas.on('selection:updated', () => {
-    //   // const activeObjects = controller.canvas.getActiveObjects();
-
-    //   // if (activeObjects.length === 0) {
-    //   //   this.props.setEditor({isCanvasDeselected: true});
-    //   // } else {
-    //   //   this.props.setEditor({isCanvasDeselected: false});
-    //   // }
-    //   this.props.setEditor({isCanvasDeselected: false});
-    //   console.log ('selection:updated, isCanvasDeselected: ', self.state.isCanvasDeselected);
-    // });
 
     document.addEventListener('click', (event:MouseEvent) => {
       const canvas = this.props.editor.canvasController.canvas;
@@ -165,12 +148,14 @@ class Editor extends Component<Props, State> {
             </Col>
             <Col xs={4} className="properties-menu-container d-flex flex-column">
               {/* Editor Panel */}
-              {this.props.editor.editorReady ? (
+              {this.props.editor.editorReady && (
                 <>
                   <Row>
-                    <div className="mt-3">     
-                      <ObjectControlButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />      
-                    </div>
+                      <div className="mt-3">     
+                        <ObjectControlButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />      
+                      </div>
+                  </Row>
+                  <Row>
                     <div className="mt-3">  
                       {!this.props.editor.editing || (<TextEditingTool 
                         setEditor={this.setEditorState} 
@@ -178,17 +163,7 @@ class Editor extends Component<Props, State> {
                         />)}
                     </div>
                   </Row>
-                  <Row>
-                      {
-                      // (true) ||
-                      (this.props.editor.fillSelected && 
-                       this.props.editor.selectedObjects.length === 0 && 
-                       !this.props.editor.isCanvasDeselected) && 
-                        (<TextureButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />)
-                      }
-                  </Row>
                   <Row className="d-flex">
-                    {/* fillSelected and !isCanvasDeselected */}
                   {
                   /* ***** Need to check type is text or canvas */
                   (this.props.editor.fillSelected && !this.props.editor.isCanvasDeselected) &&
@@ -199,17 +174,26 @@ class Editor extends Component<Props, State> {
                     }}
                   />)}
                   </Row>
+                  <Row>
+                      {
+                      // (true) ||
+                      (this.props.editor.fillSelected && 
+                       this.props.editor.selectedObjects.length === 0 && 
+                       !this.props.editor.isCanvasDeselected) && 
+                        (<TextureButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />)
+                      }
+                  </Row>
                 </>
-              ) : null}
+              )}
             </Col>            
             <Col xs={6} className="editor-container">
                   <Row>
                     <HidePrintableAreaSwitch editor={this.props.editor} setEditor={this.props.setEditor} />
                   </Row>              
                 <Canvas
-                  tShirtId={DEFAULT_TSHIRT_ID}
-                  tshirt="tshirt"
-                  controller={(controller) => this.initCanvasController(controller)} />
+                  initCanvasController={(controller) => this.initCanvasController(controller)} 
+                  editor={this.props.editor}
+                  setEditor={this.props.setEditor} />
                 <TextLoader className="spinner-off"/>
             </Col>
           </Row>
