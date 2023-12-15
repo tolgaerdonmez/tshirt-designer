@@ -3,16 +3,16 @@ import { Button, Modal, Form } from "react-bootstrap";
 import { fabric } from "fabric";
 
 interface Props {
+	show: boolean;
+  	setShow: (visible:boolean)=>void;	
 	importFunction: (json: object | fabric.Object) => void;
 }
 
-function ImportProjectModal({ importFunction }: Props): ReactElement {
-	const [show, setShow] = useState(false);
+function ImportProjectModal({ show, setShow, importFunction }: Props): ReactElement {
+	// const [show, setShow] = useState(false);
 	const [canvasJSON, setCanvasJSON] = useState({} as object | fabric.Object);
 	const [fileName, setFileName] = useState("file");
 	const handleClose = () => setShow(false);
-	const handleShow = () => setShow(true);
-
 	const handleFileOnChange = (e: ChangeEvent<HTMLInputElement> | any) => {
 		const file: File = e.target.files[0];
 		let reader = new FileReader();
@@ -35,10 +35,6 @@ function ImportProjectModal({ importFunction }: Props): ReactElement {
 
 	return (
 		<>
-			<Button variant="primary" onClick={handleShow}>
-				Import Design Project File
-			</Button>
-
 			<Modal show={show} onHide={handleClose}>
 				<Modal.Body>
 					<div className="py-2 px-2">

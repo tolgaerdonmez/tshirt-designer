@@ -1,256 +1,202 @@
-import React, { Component, ChangeEvent } from "react";
+import React, { Component } from "react";
 import {
   Col,
-  Row,
-  Button,
-  InputGroup,
-  FormControl,
-  ButtonGroup,
+  Row
 } from "react-bootstrap";
-import Canvas, { CanvasController, CanvasOrderDirection } from "./Canvas";
-import FontPicker from "../CustomFontPicker";
-import ImageUploadModal from "../Modals/Image/ImageUploadModal";
-import ExportImageModal from "../Modals/Image/ExportImageModal";
-import ImportProjectModal from "../Modals/Project/ImportProjectModal";
-import ExportProjectModal from "../Modals/Project/ExportProjectModal";
+
+import Canvas from "./Canvas/Canvas";
 import "./Editor.css";
 
-import { fabric } from "fabric";
-import { google_access_key } from "../../config.json";
-import ColorPicker from "../ColorPicker/ColorPicker";
-import ColorSelector from "../ColorSelector/SketchPicker";
+import ColorSelector from "./ColorSelector/SketchPicker";
+import TextEditingTool from "./TextEditingTool/TextEditingTool";
+import SideMenu from "../SideMenu/SideMenu";
+import TextLoader from "./TextLoader/TextLoader";
+import TextureButtonsGroup from "./TextureButtonsGroup/TextureButtonsGroup";
+import HidePrintableAreaSwitch from "./HidePrintableAreaSwitch/HidePrintableAreaSwitch";
 
-interface Props {}
-interface State {
-  canvasController: CanvasController;
-  editorReady: boolean;
-  textInput: string;
-  textFont: string;
-  editing: boolean;
-  currentColor: string;
-  selectedObjects: fabric.Object[];
-  foreground: string;
-  [key: string]: any;
+import {
+  DEFAULT_FG,
+  DEFAULT_FONT,
+} from "../../data_type/constants";
+
+import {State, CanvasController} from "../../data_type/interfaces";
+import ObjectControlButtonsGroup from "./ObjectControlButtonsGroup/ObjectControlButtonsGroup";
+
+interface Props {
+  editor:State;
+  setEditor:(editorState:Record<string, any>, callback?:()=>void)=>void;
 }
 
-const hexToRGBA = (hex: string, alpha: number): string => {
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
-  return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-};
-
-// const colorObjToString = ({rgb}:any):string => {
-// 	return rgb? `rgba(${rgb.r},${rgb.b},${rgb.g},255)`: "rgba(255,255,255,255)";
-// }
-
+// const hexToRGBA = (hex: string, alpha: number): string => {
+//   let r = parseInt(hex.slice(1, 3), 16);
+//   let g = parseInt(hex.slice(3, 5), 16);
+//   let b = parseInt(hex.slice(5, 7), 16);
+//   return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+// };
 class Editor extends Component<Props, State> {
-  state = {
-    canvasController: {} as CanvasController,
-    editorReady: false,
-    textInput: "",
-    textFont: "Open Sans",
-    editing: false,
-    selectedObjects: [] as fabric.Object[],
-    foreground: "#FFFFFF",
-    currentColor: "rgba(255,255,255,255)",
-  };
 
-  // SH 6/5/2023
-  // raising ColorSelector Event
-  onHandleChangeComplete = (color: any) => {
-    this.setState({
-      foreground: color.hex,
-      currentColor: hexToRGBA(color.hex, 255),
+  syncText = (textbox:any)=> { 
+    const self = this as Editor;
+    textbox.on ('change', function () {
+      self.props.setEditor({textInput: textbox.text})
     });
+  }
+
+  setEditorState = (stateProperties:object, callback?:()=>void) => {
+    this.props.setEditor({...stateProperties}, callback);
   };
 
-  handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ [e.target.name]: e.target.value });
+  handleColorSelection = (color: any) => {
+    this.props.setEditor(
+      {
+        foregroundColor: color.hex,
+      }, () => {
+        // Get all elements in the HTML document
+        const inputElements = document.querySelectorAll("input");
+        // Check if all elements are not selected
+        const allNotActive = Array.from(inputElements).every(
+          (element) => !element.disabled
+        );
+        // only tshirt is selected on the canvas
+        if (this.props.editor.selectedObjects.length === 0 && allNotActive) {
+          this.props.editor.canvasController.updateTShirtColor(
+            this.props.editor.foregroundColor
+          );
+          this.props.setEditor({ tshirtColor: this.props.editor.foregroundColor});
+        } else if (this.props.editor.editing) {  // text is selected
+              this.props.editor.canvasController.updateTextColor (
+                this.props.editor.selectedObjects[0] as fabric.Textbox,
+                this.props.editor.foregroundColor
+              );
+        }
+        this.props.setEditor({isCanvasDeselected:false});
+      });
   };
 
   initCanvasController = (controller: CanvasController) => {
+    const self = this as Editor;
     controller.canvas.on("mouse:down", () => {
       const selected = controller.canvas.getActiveObjects();
+      const textbox = selected[0];
+      const canEdit = (selected.length === 1 && textbox.isType("textbox"));
       if (selected.length > 0) {
-        const canEdit: boolean =
-          selected.length === 1 && selected[0].isType("textbox");
-        this.setState({
+        this.props.setEditor({
           selectedObjects: selected,
-          editing: canEdit ? true : false,
-          textInput: canEdit ? (selected[0] as any).text : "",
-          textFont: canEdit ? (selected[0] as any).fontFamily : "Open Sans",
-          currentColor: canEdit
-            ? (selected[0] as any).fill
-            : "rgba(255,255,255,255)",
-        });
-      } else
-        this.setState({
+          editing: canEdit,
+          textInput: canEdit ? (textbox as any).text : "",
+          textFont: canEdit ? (textbox as any).fontFamily : DEFAULT_FONT,
+          foregroundColor: canEdit
+            ? (textbox as any).fill
+            : DEFAULT_FG,
+        }, ()=> { 
+          if (canEdit)
+            this.syncText(textbox);  // sync canvas text and html textbox value
+        });      
+      } else {
+        this.props.setEditor({
           selectedObjects: [],
           editing: false,
           textInput: "",
-          textFont: "Open Sans",
-          currentColor: "rgba(255,255,255,255)",
+          textFont: DEFAULT_FONT,
+          foregroundColor: DEFAULT_FG,
         });
+      }
+      self.props.setEditor({ isCanvasDeselected: false});
     });
     controller.canvas.on("mouse:up", () => {
       const selected = controller.canvas.getActiveObjects();
       if (selected.length > 0)
-        this.setState({
-          selectedObjects: selected,
+        this.props.setEditor({
+          selectedObjects: selected
         });
+    }); 
+    controller.canvas.on('selection:created', function () {
+      self.props.setEditor({ isCanvasDeselected: false}, ()=>{
+              console.log ('selection:created, isCanvasDeselected: ', self.props.editor.isCanvasDeselected);
+      console.log ('fillSelected: ', self.props.editor.fillSelected);
+      });
     });
-    this.setState({ canvasController: controller, editorReady: true });
+
+    document.addEventListener('click', (event:MouseEvent) => {
+      const canvas = this.props.editor.canvasController.canvas;
+      const canvasRect = canvas.getElement().getBoundingClientRect();
+      const isClickOutsideCanvas = (
+        event.clientX < canvasRect.left ||
+        event.clientX > canvasRect.right ||
+        event.clientY < canvasRect.top ||
+        event.clientY > canvasRect.bottom
+      );
+
+      if (isClickOutsideCanvas) 
+        this.props.setEditor({isCanvasDeselected:true});
+    });
+
+    this.props.setEditor({ canvasController: controller, editorReady: true });
   };
 
   render() {
-    const { canvasController } = this.state;
     return (
-      <div className="my-5 mx-5">
-        <Row>
-          <Col>
-            <Canvas
-              tshirt="tshirt"
-              controller={(controller) => this.initCanvasController(controller)}
-            />
-            {/* Object options */}
-            <div className="mt-3">
-              <Button
-                variant="danger"
-                disabled={this.state.selectedObjects.length === 0}
-                onClick={() => {
-                  canvasController.deleteObjects(this.state.selectedObjects);
-                  this.setState({ selectedObjects: [] as fabric.Object[] });
-                }}
-              >
-                <i className="fas fa-trash mr-1"></i>
-                Delete Selected
-              </Button>
-              <ButtonGroup aria-label="change object order" className="ml-2">
-                {Object.keys(CanvasOrderDirection).map((direction) => (
-                  <Button
-                    key={direction}
-                    variant="warning"
-                    disabled={this.state.selectedObjects.length === 0}
-                    onClick={() =>
-                      this.state.canvasController.changeObjectOrder(
-                        this.state.selectedObjects,
-                        direction
-                      )
-                    }
-                  >
-                    {direction}
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </div>
-          </Col>
-          <Col className="d-flex flex-column">
-            <Row>
-              <h1>Editor</h1>
-            </Row>
-            {/* Editor Panel */}
-            {this.state.editorReady ? (
-              <>
-                <Row>
-                  <ImageUploadModal
-                    canvas={this.state.canvasController.canvas}
-                  />
-                </Row>
-                <Row>
-                  <InputGroup className="my-3">
-                    <InputGroup.Prepend>
-                      <FontPicker
-                        apiKey={google_access_key}
-                        activeFontFamily={this.state.textFont}
-                        onChange={(nextFont) => {
-                          this.setState({
-                            textFont: nextFont.family,
-                          });
-                        }}
-                        setActiveFontCallback={() => {
-                          this.state.canvasController.canvas.renderAll();
-                        }}
-                      />
-                    </InputGroup.Prepend>
-                    <FormControl
-                      placeholder={
-                        !this.state.editing ? "Add Text" : "Update Text"
-                      }
-                      aria-label="text"
-                      name="textInput"
-                      onChange={this.handleOnChange}
-                      value={this.state.textInput}
-                      type="text"
-                    />
-                    <InputGroup.Prepend>
-                      <Button
-                        className="h-"
-                        onClick={() => {
-                          console.log("canvasController", canvasController);
-                          console.log("state", this.state);
-                          if (!this.state.editing)
-                            canvasController.addText(
-                              this.state.textInput,
-                              this.state.textFont,
-                              this.state.currentColor
-                            );
-                          else
-                            canvasController.updateText(
-                              this.state.selectedObjects[0] as fabric.Textbox,
-                              this.state.textInput,
-                              this.state.textFont,
-                              this.state.currentColor
-                            );
-                          this.setState({ textInput: "", editing: false });
-                        }}
-                      >
-                        {!this.state.editing ? (
-                          <>
-                            <i className="fas fa-plus mr-1"></i>Add Text
-                          </>
-                        ) : (
-                          "Update Text"
-                        )}
-                      </Button>
-                    </InputGroup.Prepend>
-                  </InputGroup>
-                </Row>
-                <Row className="d-flex justify-content-center">
-                  <ColorPicker
-                    defaultColor={this.state.currentColor}
-                    getColor={(color) => this.setState({ currentColor: color })}
-                  />
-                </Row>
-                <Row className="d-flex justify-content-center">
-                  <ColorSelector
-                    color={this.state.foreground}
+      <>
+        {/* <div className="my-5 mx-5"> */}
+        <div>
+          <Row className="main-body">
+            <Col xs={1} className="side-menu-container">
+            {/* Sidebar content goes here */}
+              <SideMenu canvas={this.props.editor.canvasController.canvas} editor={this.props.editor} setEditor={this.setEditorState} />
+            </Col>
+            <Col xs={4} className="properties-menu-container d-flex flex-column">
+              {/* Editor Panel */}
+              {this.props.editor.editorReady && (
+                <>
+                  <Row>
+                      <div className="mt-3">     
+                        <ObjectControlButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />      
+                      </div>
+                  </Row>
+                  <Row>
+                    <div className="mt-3">  
+                      {!this.props.editor.editing || (<TextEditingTool 
+                        setEditor={this.setEditorState} 
+                        editor={this.props.editor} 
+                        />)}
+                    </div>
+                  </Row>
+                  <Row className="d-flex">
+                  {
+                  /* Need to check whether fabric object type is text or canvas */
+                  (this.props.editor.fillSelected && !this.props.editor.isCanvasDeselected) &&
+                  (<ColorSelector
+                    color={this.props.editor.foregroundColor}
                     handleChangeComplete={(color: string) => {
-                      this.onHandleChangeComplete(color);
+                      this.handleColorSelection(color);
                     }}
-                  />
-                </Row>
-                <Row className="flex-grow-1"></Row>
-                <Row className="align-self-end">
-                  <ExportImageModal
-                    exportFunction={this.state.canvasController.exportToImage}
-                  />
-                  <ButtonGroup className="ml-2">
-                    <ExportProjectModal
-                      exportFunction={this.state.canvasController.exportToJSON}
-                    />
-                    <ImportProjectModal
-                      importFunction={
-                        this.state.canvasController.importFromJSON
+                  />)}
+                  </Row>
+                  <Row>
+                      {
+                      // (true) ||
+                      (this.props.editor.fillSelected && 
+                       this.props.editor.selectedObjects.length === 0 && 
+                       !this.props.editor.isCanvasDeselected) && 
+                        (<TextureButtonsGroup editor={this.props.editor} setEditor={this.setEditorState} />)
                       }
-                    />
-                  </ButtonGroup>
-                </Row>
-              </>
-            ) : null}
-          </Col>
-        </Row>
-      </div>
+                  </Row>
+                </>
+              )}
+            </Col>            
+            <Col xs={6} className="editor-container">
+                  <Row>
+                    <HidePrintableAreaSwitch editor={this.props.editor} setEditor={this.props.setEditor} />
+                  </Row>              
+                <Canvas
+                  initCanvasController={(controller) => this.initCanvasController(controller)} 
+                  editor={this.props.editor}
+                  setEditor={this.props.setEditor} />
+                <TextLoader className="spinner-off"/>
+            </Col>
+          </Row>
+        </div>
+      </>
     );
   }
 }

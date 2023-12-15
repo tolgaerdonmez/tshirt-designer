@@ -1,12 +1,21 @@
 {
 	"name": "tshirt-designer",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
-	"author": {
-		"name": "Tolga Erdonmez",
-		"email": "tolgaerdonmez@gmail.com"
+	"authors": {
+		"author1": {
+			"name": "Tolga Erdonmez",
+			"email": "tolgaerdonmez@gmail.com"
+		},
+		"author2": {
+			"name": "Steve Hon",
+			"email": "stevekyhon@gmail.com"			
+		}
 	},
 	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.5.1",
+		"@fortawesome/free-solid-svg-icons": "^6.5.1",
+		"@fortawesome/react-fontawesome": "^0.2.0",
 		"@testing-library/jest-dom": "^4.2.4",
 		"@testing-library/react": "^9.3.2",
 		"@testing-library/user-event": "^7.1.2",
@@ -17,7 +26,7 @@
 		"@types/react-dom": "^16.9.0",
 		"fabric": "^3.6.3",
 		"file-saver": "^2.0.2",
-		"font-picker-react": "^3.5.1",
+		"font-picker-react": "^3.5.2",
 		"react": "^16.13.1",
 		"react-bootstrap": "^1.0.1",
 		"react-color": "^2.19.3",
