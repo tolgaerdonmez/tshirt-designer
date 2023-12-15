@@ -46,6 +46,8 @@ class Editor extends Component<Props, State> {
     this.props.setEditor({...stateProperties}, callback);
   };
 
+  // SH 6/5/2023
+  // raising ColorSelector Event
   handleColorSelection = (color: any) => {
     this.props.setEditor(
       {
