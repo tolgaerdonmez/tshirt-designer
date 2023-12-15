@@ -55,6 +55,8 @@ export interface State {
   previewing: boolean;
   fillSelected: boolean;
   isCanvasDeselected: boolean;
+  loadFromJSON: boolean;
+  json: object | fabric.Object;
   callback:()=>void;
   [key: string]: any;
 }

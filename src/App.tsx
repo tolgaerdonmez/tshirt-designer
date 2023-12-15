@@ -28,6 +28,8 @@ const App: React.FC = () => {
     previewing: false,
     fillSelected: true,
     isCanvasDeselected: true,
+    loadFromJSON: false,
+    json:{},
 	  callback:()=>{}
   });
 
@@ -49,7 +51,7 @@ const App: React.FC = () => {
         const spinnerContainer:Element = document.getElementsByClassName ("spinner-container")[0];
         parentNode.appendChild(spinnerContainer);
     }
-    // This is ugly but I have to dig deeper into the dependencies to
+    // I have to dig deeper into the dependencies to
     // find its async function.
     // Just a temp fix by timing it.
     setTimeout (()=>{
@@ -60,9 +62,11 @@ const App: React.FC = () => {
     }, 2000);
   }
 
+
   useEffect(()=>{
 	  state.callback();
-  },[state]);
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[state.callback]);
 
   useEffect(()=>{
     // callback from Filemenu 
@@ -93,11 +97,34 @@ const App: React.FC = () => {
   },[state.previewing]);
 
   useEffect(()=>{
-    const {editorReady, canvasController} = state;
-    if(editorReady) 
+    const {editorReady, canvasController, loadFromJSON, json} = state;
+    if(editorReady && !loadFromJSON) 
       canvasController.setBackground();
+    else if (editorReady && loadFromJSON)
+    {
+      canvasController.canvas.loadFromJSON(json, () => {
+        console.log ('canvasController, ', canvasController);
+        console.log ('json: ', json);
+        let {backgroundImage}:any = json;
+        let editableArea:any = null;
+        //const editableArea:any = canvasController.getItemByName("editableArea");
+        const allObjects = canvasController.canvas.getObjects();
+        for (let i = 0; i < allObjects.length; i++) 
+          if (allObjects[i].name === "editableArea") 
+            editableArea = allObjects[i];
+          if (editableArea) {
+            const {width, height} = backgroundImage;
+
+            console.log ('backgroundImage: ', backgroundImage);
+            editableArea.selectable = false;
+            canvasController.canvas.setWidth(width);
+            canvasController.canvas.setHeight(height);
+            canvasController.canvas.renderAll();
+          }
+      });
+      handleEditorState({loadFromJSON: false});}
     // eslint-disable-next-line react-hooks/exhaustive-deps 
-  },[state.tshirtId])
+  },[state.tshirtId]);
 
   useEffect(()=>{
     const {editing, 

@@ -485,33 +485,18 @@ export default class Canvas extends Component<Props, State> {
   //     this.setBackground();
   // }
   importFromJSON = (json: object | fabric.Object) => {
-    const self = this as Canvas;
     const {setEditor} = this.props;
     const {objects} = (json as any);
-    console.log ('json objects: ', (json as any).objects);
     if (objects) {
-        objects.forEach((obj:any)=>{
-        const {id:tshirtId}=obj;
-        if (tshirtId === "tshirt_0001" || tshirtId === "tshirt_0002") {
-                    
-          setEditor({tshirtId:tshirtId}, ()=>{
-            if (this.props.editor.canvasController !== undefined)
-            this.props.initCanvasController({ ...(this as CanvasController) });
-          
-            this.setBackground ();   
-
-            this.canvas.loadFromJSON(json, () => {
-              const editableArea:any = self.getItemByName("editableArea");
-              if (editableArea) {
-                editableArea.selectable = false;
-                self.canvas.renderAll();
-              }
-            });
-          });      
-
-          // exit from forEach callback
-          return true;
-        }  
+        objects.forEach(({id:tshirtId}:any)=>{
+          if (tshirtId === "tshirt_0001" || tshirtId === "tshirt_0002") {
+            setEditor({tshirtId:tshirtId, 
+                      loadFromJSON: true, 
+                      json: JSON.parse(JSON.stringify(json)) 
+                    });
+            // see useEffect in App.tsx 
+            return true;
+          }  
       });
 
     }
