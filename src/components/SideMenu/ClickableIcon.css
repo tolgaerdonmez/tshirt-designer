@@ -1,0 +1,29 @@
+.clickable-icon-container {
+    display: flex;
+    /* justify-content: center; */
+    align-items: center; 
+}
+
+.clickable-icon {
+    border:none;
+    text-decoration: none;
+    color: #000;
+    /* Initial color */
+    transition: color 0.3s ease;
+    /* Transition effect on color change */
+    &:hover {
+        color: #ff0000;
+        /* Color on hover */
+    }
+}
+
+.clickable-icon .figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    text-align: center;
+    vertical-align: middle;
+}

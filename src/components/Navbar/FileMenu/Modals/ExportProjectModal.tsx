@@ -2,21 +2,27 @@ import React, { ReactElement, useState, ChangeEvent, FormEvent } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
 
 interface Props {
-	exportFunction: (fileName: string) => void;
+	show: boolean;
+  setShow: (visible:boolean)=>void;
+  exportFunction: (
+    format: string,
+    fileName?: string,
+    includeBackground?: boolean,
+  ) => void;
 }
 
-function ExportProjectModal({ exportFunction }: Props): ReactElement {
+function ExportProjectModal({ exportFunction, show, setShow }: Props): ReactElement {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		var isFileSaverSupported = !!new Blob();
 	} catch (error) {
 		console.log(error);
 	}
-	const [show, setShow] = useState(false);
-	const [fileName, setFileName] = useState("");
+	// const [show, setShow] = useState(false);
+	const [fileName, setFileName] = useState("untitled");
 
 	const handleClose = () => setShow(false);
-	const handleShow = () => setShow(true);
+	// const handleShow = () => setShow(true);
 
 	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setFileName(e.target.value);
@@ -30,10 +36,6 @@ function ExportProjectModal({ exportFunction }: Props): ReactElement {
 
 	return (
 		<>
-			<Button variant="primary" onClick={handleShow}>
-				Export Design Project File
-			</Button>
-
 			<Modal show={show} onHide={handleClose}>
 				<Form onSubmit={handleDownload}>
 					<Modal.Body>

@@ -14,7 +14,36 @@
 .expanded {
 	box-shadow: none !important;
 } */
+.main-body {
+	margin: 0px;
+}
+
 .dropdown-menu {
 	height: 200px;
 	overflow-y: scroll;
+}
+
+.main-body {
+	display: flex;
+}
+
+.side-menu-container {
+	position: inherit;
+	height: 100vh;
+	width: 100px;
+	/* background-color: #f8f9fa; */
+	/* background-color: #eee; */
+	padding: 0px;
+	/* box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); */
+	overflow-y: auto;
+	min-width: 100px;
+}
+
+.properties-menu-container {
+	flex: 1;
+	padding: 15px 0px 0px 15px;
+}
+
+.editor-container {
+	padding: 15px;
 }
